@@ -1,0 +1,15 @@
+<package>
+  <name>mashes</name>
+  <version>0.0.1</version>
+  <description>
+    This package provides mashes packages.
+  </description>
+  <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>
