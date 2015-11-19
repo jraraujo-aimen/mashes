@@ -1,4 +1,5 @@
 import os
+import cv2
 import yaml
 import time
 import struct
@@ -10,9 +11,8 @@ from numpy.ctypeslib import ndpointer
 
 
 path = os.path.dirname(os.path.abspath(__file__))
-
 if platform.system() == 'Windows':
-    NITdll = ctypes.CDLL(os.path.join(path, 'Tachyon_acq.dll'))
+    NITdll = ctypes.CDLL(os.path.join(path, 'libtachyon_acq.dll'))
 else:
     NITdll = ctypes.cdll.LoadLibrary(os.path.join(path, 'libtachyon_acq.so'))
 
@@ -85,20 +85,16 @@ _set_timeout.restype = ctypes.c_int
 
 
 class Tachyon():
-    def __init__(self, model=1024, config='tachyon.yml'):
+    def __init__(self, config='tachyon.yml'):
         self.connected = False
         self.open()
-        camera_info = self.get_camera_info()
-        if camera_info[0] == 'TACHYON 1024 NEW_INFRARED_TECHN':
-            subprocess.call(['java', '-cp', 'FWLoader.jar',
-                             'FWLoader', '-c', '-uf', 'nit_tachyon_32_HS.bit'])
-            model = 1024
-        elif camera_info[0] == 'TACHYON 6400 NEW_INFRARED_TECHN':
-            model = 6400
-        print camera_info
-        self.model = model
-        self.size = int(np.sqrt(model))
+
+        self.model = self.configure_bitstream()
+        self.size = int(np.sqrt(self.model))
         self.configure(config)
+
+        self.bground = None
+        self.background = None
 
     def open(self):
         """Opens a connection with a TACHYON camera."""
@@ -126,15 +122,17 @@ class Tachyon():
         else:
             return None
 
-    def configure(self, filename):
-        with open(filename, 'r') as ymlfile:
-            cfg = yaml.load(ymlfile)
-        int_time = float(cfg['configuration']['int_time'])
-        wait_time = float(cfg['configuration']['wait_time'])
-        bias = float(cfg['configuration']['bias'])
-        vth_value = int(cfg['configuration']['vth_value'])
-        timeout = int(cfg['configuration']['timeout'])
-        self.set_configuration(int_time, wait_time, bias, vth_value, timeout)
+    def configure_bitstream(self):
+        model = 1024
+        camera_info = self.get_camera_info()
+        print camera_info
+        if camera_info[0] == 'TACHYON 1024 NEW_INFRARED_TECHN':
+            subprocess.call(['java', '-cp', 'FWLoader.jar',
+                             'FWLoader', '-c', '-uf', 'nit_tachyon_32_HS.bit'])
+            model = 1024
+        elif camera_info[0] == 'TACHYON 6400 NEW_INFRARED_TECHN':
+            model = 6400
+        return model
 
     def set_configuration(self, int_time, wait_time, bias, vth_value, timeout):
         """Puts configuration values of the camera."""
@@ -145,19 +143,31 @@ class Tachyon():
             self.vth_value = _set_vth(vth_value)
             self.timeout = _set_timeout(timeout)
 
+    def configure(self, filename):
+        with open(filename, 'r') as ymlfile:
+            cfg = yaml.load(ymlfile)
+        int_time = float(cfg['configuration']['int_time'])
+        wait_time = float(cfg['configuration']['wait_time'])
+        bias = float(cfg['configuration']['bias'])
+        vth_value = int(cfg['configuration']['vth_value'])
+        timeout = int(cfg['configuration']['timeout'])
+        self.set_configuration(int_time, wait_time, bias, vth_value, timeout)
+
     def calibrate(self, target=100, auto_off=1):
         """Performs an offset calibration for dark current correction."""
         if self.connected:
-            for k in range(3000):
+            for k in range(4500):
+                image, header = self.read_frame()
                 if k == 100:
                     _close_shutter()
-                if k == 600:
+                elif k == 600:
                     _calibrate(target, auto_off)
-                if k == 2600:
+                elif k == 2600:
                     _stop_calibration()
-                if k == 2700:
+                elif k == 2700:
                     _open_shutter()
-                image, header = self.read_frame()
+                elif k > 3200 and k < 4400:
+                    self.update_background(image)
 
     def start_calibration(self, target=100, auto_off=1):
         """Starts the calibration process."""
@@ -229,6 +239,24 @@ class Tachyon():
         print "Internal frame counter", struct.unpack('I', struct.pack(
             'BBBB', header[6], header[7], header[4], header[5]))
 
+    def update_background(self, frame):
+        """dst = (1 - 0.05) * dst + 0.05 * src"""
+        if self.bground is None:
+            self.bground = np.zeros(frame.shape, dtype=np.float32)
+        cv2.accumulateWeighted(np.float32(frame), self.bground, 0.02)
+        self.background = np.int16(self.bground)
+
+    def process_frame(self, frame):
+        if self.background is None:
+            self.background = np.zeros(frame.shape, dtype=np.int16)
+        mean = int(cv2.mean(self.background)[0])
+        frame = cv2.subtract(frame, self.background - mean)
+        frame[frame < 0] = 0
+        frame[frame > 1024] = 1024
+        frame = cv2.subtract(np.uint16(frame), mean)
+        #frame = cv2.subtract(np.uint16(frame), np.uint16(self.background))
+        return np.int16(frame)
+
 
 if __name__ == '__main__':
     from nitdat import LUT_IRON
@@ -241,6 +269,7 @@ if __name__ == '__main__':
 
     for k in range(5000):
         image, header = tachyon.read_frame()
+        image = tachyon.process_frame(image)
     tachyon.disconnect()
 
     print image

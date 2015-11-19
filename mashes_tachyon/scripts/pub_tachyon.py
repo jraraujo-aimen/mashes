@@ -35,6 +35,7 @@ def tachyon():
     while not rospy.is_shutdown():
         try:
             frame, header = tachyon.read_frame()
+            frame = tachyon.process_frame(frame)
             if mode == 'rgb8':
                 frame = LUT_IRON[frame]
             else:
