@@ -202,7 +202,6 @@ class NitDat():
     def process_frames(self, frames, offset=1000):
         start, end = self.find_seam(frames)
         self.background = np.int16(np.mean(frames[start-800:start-300], axis=0))
-        #[dat.update_background(frames[start-800+k]) for k in range(500)]
         frames = [self.process_frame(frame) for frame in frames[start:end]]
         return np.int16(frames)
 

@@ -95,6 +95,7 @@ class Tachyon():
 
         self.bground = None
         self.background = None
+        self.process_background = False
 
     def open(self):
         """Opens a connection with a TACHYON camera."""
@@ -165,9 +166,9 @@ class Tachyon():
                 elif k == 2600:
                     _stop_calibration()
                 elif k == 2700:
-                    _open_shutter()
-                elif k > 3200 and k < 4400:
                     self.update_background(image)
+                elif k > 3900 and k < 4400:
+                    _open_shutter()
 
     def start_calibration(self, target=100, auto_off=1):
         """Starts the calibration process."""
@@ -181,6 +182,10 @@ class Tachyon():
         """Stops the calibration process."""
         if self.connected:
             _stop_calibration()
+            time.sleep(0.1)
+            self.process_background = True
+            time.sleep(1)
+            self.process_background = False
             time.sleep(0.1)
             _open_shutter()
             time.sleep(0.5)
