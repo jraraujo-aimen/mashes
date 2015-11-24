@@ -1,0 +1,8 @@
+<launch>
+  <include file="$(find mashes_workcell)/launch/mashes_workcell.launch">
+    <arg name="gui" value="true" />    
+  </include>
+
+  <include file="$(find mashes_ueye)/launch/ueye.launch" />
+  <include file="$(find mashes_tachyon)/launch/tachyon.launch" />
+</launch>
