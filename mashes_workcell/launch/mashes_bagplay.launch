@@ -12,10 +12,10 @@
     <remap from="image" to="/tachyon/image" />
   </node>
 
-  <!--<arg name="model" value="$(find etna_workcell)/urdf/abb_workcell.xacro" />
+  <arg name="model" value="$(find etna_workcell)/urdf/mashes_workcell.xacro" />
   <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find etna_workcell)/config/workcell_visualize.rviz" required="true" />-->
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mashes_workcell)/config/workcell.rviz" required="true" />
 </launch>

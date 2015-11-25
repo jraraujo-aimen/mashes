@@ -19,16 +19,16 @@
          from the .ini file.
          See http://www.ros.org/wiki/ueye_cam for more details. -->
 
-    <param name="color_mode" type="str" value="mono8" /> <!-- valid options: 'rgb8', 'mono8', 'bayer_rggb8' -->
+    <param name="color_mode" type="str" value="mono8" />
 
-    <param name="image_width" type="int" value="1280" />
-    <param name="image_height" type="int" value="1024" />
-    <param name="image_top" type="int" value="0" /> <!-- -1: center -->
-    <param name="image_left" type="int" value="0" /> <!-- -1: center -->
+    <param name="image_width" type="int" value="640" />
+    <param name="image_height" type="int" value="512" />
+    <param name="image_top" type="int" value="0" />
+    <param name="image_left" type="int" value="0" />
 
-    <param name="subsampling" type="int" value="1" /> <!-- supported by only some UEye cameras -->
-    <param name="binning" type="int" value="4" /> <!-- supported by only some UEye cameras -->
-    <param name="sensor_scaling" type="double" value="1.0" /> <!-- supported by only some UEye cameras -->
+    <param name="subsampling" type="int" value="1" />
+    <param name="binning" type="int" value="4" />
+    <param name="sensor_scaling" type="double" value="1.0" />
 
     <param name="auto_gain" type="bool" value="True" />
     <param name="master_gain" type="int" value="0" />
