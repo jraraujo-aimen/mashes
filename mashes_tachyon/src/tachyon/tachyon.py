@@ -112,11 +112,11 @@ _set_timeout.restype = ctypes.c_int
 class Tachyon():
     def __init__(self, config='tachyon.yml'):
         self.connected = False
+        self.config = config
         self.open()
 
-        self.model = self.configure_bitstream()
-        self.size = int(np.sqrt(self.model))
-        self.configure(config)
+        self.size = 32
+        self.model = 1024
 
         self.frame = None
         self.bground = None
@@ -128,6 +128,11 @@ class Tachyon():
         if not self.connected:
             if _open_camera() > 0:  # Returns the number of cameras
                 self.connected = True
+                self.model = self.configure_bitstream()
+                self.size = int(np.sqrt(self.model))
+                self.configure(self.config)
+            else:
+                print 'ERROR: TACHYON camera not connected.'
         return self.connected
 
     def close(self):
@@ -289,7 +294,6 @@ class Tachyon():
         mean = int(cv2.mean(self.background)[0])
         frame = cv2.subtract(frame, self.background - mean)
         frame[frame < 0] = 0
-        frame[frame > 1024] = 1024
         frame = cv2.subtract(np.uint16(frame), mean)
         #frame = cv2.subtract(np.uint16(frame), np.uint16(self.background))
         return np.int16(frame)
