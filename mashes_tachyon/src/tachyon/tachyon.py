@@ -10,6 +10,31 @@ import numpy as np
 from numpy.ctypeslib import ndpointer
 
 
+def thermal_colormap(levels=1024):
+    colors = np.array([[0.00, 0.00, 0.00],
+                       [0.19, 0.00, 0.55],
+                       [0.55, 0.00, 0.62],
+                       [0.78, 0.05, 0.55],
+                       [0.90, 0.27, 0.10],
+                       [0.96, 0.47, 0.00],
+                       [1.00, 0.70, 0.00],
+                       [1.00, 0.90, 0.20],
+                       [1.00, 1.00, 1.00]])
+    steps = levels / (len(colors)-1)
+    lut = []
+    for c in range(3):
+        col = []
+        for k in range(1, len(colors)):
+            col.append(np.linspace(colors[k-1][c], colors[k][c], steps))
+        col = np.concatenate(col)
+        lut.append(col)
+    lut = np.transpose(np.vstack(lut))
+    lut_iron = np.uint8(lut * 255)
+    return lut_iron
+
+LUT_IRON = thermal_colormap()
+
+
 path = os.path.dirname(os.path.abspath(__file__))
 if platform.system() == 'Windows':
     NITdll = ctypes.CDLL(os.path.join(path, 'libtachyon_acq.dll'))
@@ -93,6 +118,7 @@ class Tachyon():
         self.size = int(np.sqrt(self.model))
         self.configure(config)
 
+        self.frame = None
         self.bground = None
         self.background = None
         self.process_background = False
@@ -165,9 +191,9 @@ class Tachyon():
                     _calibrate(target, auto_off)
                 elif k == 2600:
                     _stop_calibration()
-                elif k == 2700:
+                elif k > 2700 and k < 3900:
                     self.update_background(image)
-                elif k > 3900 and k < 4400:
+                elif k == 3900:
                     _open_shutter()
 
     def start_calibration(self, target=100, auto_off=1):
@@ -254,6 +280,12 @@ class Tachyon():
     def process_frame(self, frame):
         if self.background is None:
             self.background = np.zeros(frame.shape, dtype=np.int16)
+        if self.frame is not None:
+            mframe = (frame + self.frame) >> 1
+        else:
+            mframe = frame
+        self.frame = frame
+        frame = mframe
         mean = int(cv2.mean(self.background)[0])
         frame = cv2.subtract(frame, self.background - mean)
         frame[frame < 0] = 0
@@ -264,7 +296,6 @@ class Tachyon():
 
 
 if __name__ == '__main__':
-    from nitdat import LUT_IRON
     import matplotlib.pyplot as plt
 
     tachyon = Tachyon()
@@ -278,9 +309,13 @@ if __name__ == '__main__':
     tachyon.disconnect()
 
     print image
+    print tachyon.background
 
     plt.figure()
+    plt.subplot(121)
     plt.imshow(LUT_IRON[image], interpolation='none')
+    plt.subplot(122)
+    plt.imshow(LUT_IRON[tachyon.background], interpolation='none')
     plt.show()
 
     tachyon.close()

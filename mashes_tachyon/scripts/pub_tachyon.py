@@ -9,8 +9,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 import numpy as np
-from tachyon.tachyon import Tachyon
-from tachyon.nitdat import LUT_IRON
+from tachyon.tachyon import Tachyon, LUT_IRON
 
 
 def tachyon():
@@ -29,9 +28,9 @@ def tachyon():
 
     tachyon = Tachyon(config=config_filename)
     tachyon.connect()
-    
+
     tachyon.calibrate(24)
-    
+
     while not rospy.is_shutdown():
         try:
             frame, header = tachyon.read_frame()
@@ -45,7 +44,7 @@ def tachyon():
             image_pub.publish(image_msg)
         except CvBridgeError, e:
             print e
-            
+
     tachyon.disconnect()
     tachyon.close()
 
