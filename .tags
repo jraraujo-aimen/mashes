@@ -1,0 +1,135 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+MAShES	/home/jorge/catkin_ws/src/mashes/README.md	/^# MAShES$/;"	function	line:1
+Contents	/home/jorge/catkin_ws/src/mashes/README.md	/^## Contents$/;"	function	line:5
+Acknowledgement	/home/jorge/catkin_ws/src/mashes/README.md	/^## Acknowledgement$/;"	function	line:13
+d	/home/jorge/catkin_ws/src/mashes/mashes_measures/setup.py	/^d = generate_distutils_setup($/;"	variable	line:4
+packages	/home/jorge/catkin_ws/src/mashes/mashes_measures/setup.py	/^    packages=['measures'],$/;"	variable	line:5
+package_dir	/home/jorge/catkin_ws/src/mashes/mashes_measures/setup.py	/^    package_dir={'': 'src'}$/;"	variable	line:7
+tachyon	/home/jorge/catkin_ws/src/mashes/mashes_measures/scripts/pub_measures.py	/^def tachyon():$/;"	function	line:16
+X	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/show3d.py	/^X = np.array([0, 1, 0, 1, 0.75])$/;"	variable	line:4
+Y	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/show3d.py	/^Y = np.array([0, 0, 1, 1, 0.75])$/;"	variable	line:5
+Z	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/show3d.py	/^Z = np.array([1, 1, 1, 1, 2])$/;"	variable	line:6
+pts	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/show3d.py	/^pts = mlab.points3d(X, Y, Z, Z)$/;"	variable	line:10
+mesh	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/show3d.py	/^mesh = mlab.pipeline.delaunay2d(pts)$/;"	variable	line:14
+surf	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/show3d.py	/^surf = mlab.pipeline.surface(mesh)$/;"	variable	line:20
+f	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/show3d.py	/^def f(x, y):$/;"	function	line:31
+s	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/show3d.py	/^s = mlab.surf(x, y, f)$/;"	variable	line:36
+binarize	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^def binarize(image, threshold):$/;"	function	line:8
+erosion	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^def erosion(image):$/;"	function	line:19
+dilation	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^def dilation(image):$/;"	function	line:31
+measure	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^def measure(image):$/;"	function	line:43
+moments	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^def moments(image):$/;"	function	line:68
+ellipse	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^def ellipse(image):$/;"	function	line:83
+memory_bin	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^def memory_bin(image, filename):$/;"	function	line:109
+img	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    img = cv2.imread('..\/..\/data\/frame.png')$/;"	variable	line:126
+img	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)$/;"	variable	line:127
+bin	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    bin = binarize(img, 128)$/;"	variable	line:129
+ero	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    ero = erosion(bin)$/;"	variable	line:130
+bin	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    bin = erosion(erosion(erosion(erosion(erosion(bin)))))$/;"	variable	line:132
+DATA	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    DATA = array([$/;"	variable	line:160
+Xs	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    Xs = DATA[:,0]$/;"	variable	line:193
+Ys	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    Ys = DATA[:,1]$/;"	variable	line:194
+Zs	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    Zs = DATA[:,2]$/;"	variable	line:195
+fig	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    fig = plt.figure()$/;"	variable	line:198
+ax	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    ax = fig.add_subplot(111, projection='3d')$/;"	variable	line:199
+surf	/home/jorge/catkin_ws/src/mashes/mashes_measures/src/measures/measures.py	/^    surf = ax.plot_trisurf(Xs, Ys, Zs, cmap=cm.jet, linewidth=0)$/;"	variable	line:201
+d	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/setup.py	/^d = generate_distutils_setup($/;"	variable	line:4
+packages	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/setup.py	/^    packages=['tachyon'],$/;"	variable	line:5
+package_dir	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/setup.py	/^    package_dir={'': 'src'}$/;"	variable	line:7
+tachyon	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/scripts/pub_tachyon.py	/^def tachyon():$/;"	function	line:16
+configuration	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/config/tachyon.yml	/^configuration:$/;"	function	line:1
+int_time	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/config/tachyon.yml	/^    int_time: 500.0$/;"	function	line:2
+wait_time	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/config/tachyon.yml	/^    wait_time: 500.0$/;"	function	line:3
+bias	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/config/tachyon.yml	/^    bias: 1$/;"	function	line:4
+vth_value	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/config/tachyon.yml	/^    vth_value: 256$/;"	function	line:5
+timeout	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/config/tachyon.yml	/^    timeout: 1000$/;"	function	line:6
+configuration	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.yml	/^configuration:$/;"	function	line:1
+int_time	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.yml	/^    int_time: 500.0$/;"	function	line:2
+wait_time	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.yml	/^    wait_time: 500.0$/;"	function	line:3
+bias	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.yml	/^    bias: 1$/;"	function	line:4
+vth_value	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.yml	/^    vth_value: 256$/;"	function	line:5
+timeout	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.yml	/^    timeout: 1000$/;"	function	line:6
+path	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^path = os.path.dirname(os.path.abspath(__file__))$/;"	variable	line:13
+NITdll	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    NITdll = ctypes.CDLL(os.path.join(path, 'libtachyon_acq.dll'))$/;"	variable	line:15
+NITdll	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    NITdll = ctypes.cdll.LoadLibrary(os.path.join(path, 'libtachyon_acq.so'))$/;"	variable	line:17
+_open_camera	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_open_camera = NITdll.open_camera$/;"	variable	line:21
+_set_active_camera	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_set_active_camera = NITdll.set_active_camera$/;"	variable	line:24
+_get_camera_info	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_get_camera_info = NITdll.get_camera_info$/;"	variable	line:28
+_close_camera	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_close_camera = NITdll.close_camera$/;"	variable	line:32
+_reset_camera	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_reset_camera = NITdll.reset_camera$/;"	variable	line:35
+_usb_error	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_usb_error = NITdll.usb_error$/;"	variable	line:38
+_start	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_start = NITdll.start$/;"	variable	line:42
+_stop	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_stop = NITdll.stop$/;"	variable	line:45
+_read_frame	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_read_frame = NITdll.read_frame$/;"	variable	line:48
+_calibrate	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_calibrate = NITdll.calibrate$/;"	variable	line:52
+_stop_calibration	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_stop_calibration = NITdll.stop_calibration$/;"	variable	line:56
+_close_shutter	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_close_shutter = NITdll.close_shutter$/;"	variable	line:59
+_open_shutter	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_open_shutter = NITdll.open_shutter$/;"	variable	line:62
+_set_integration_time	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_set_integration_time = NITdll.set_integration_time$/;"	variable	line:66
+_set_wait_time	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_set_wait_time = NITdll.set_wait_time$/;"	variable	line:70
+_set_bias	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_set_bias = NITdll.set_bias$/;"	variable	line:74
+_set_vth	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_set_vth = NITdll.set_Vth$/;"	variable	line:78
+_set_timeout	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^_set_timeout = NITdll.set_timeout$/;"	variable	line:82
+Tachyon	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^class Tachyon():$/;"	class	line:87
+__init__	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def __init__(self, config='tachyon.yml'):$/;"	member	line:88	class:Tachyon
+open	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def open(self):$/;"	member	line:100	class:Tachyon
+close	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def close(self):$/;"	member	line:107	class:Tachyon
+get_camera_info	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def get_camera_info(self):$/;"	member	line:115	class:Tachyon
+configure_bitstream	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def configure_bitstream(self):$/;"	member	line:126	class:Tachyon
+set_configuration	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def set_configuration(self, int_time, wait_time, bias, vth_value, timeout):$/;"	member	line:138	class:Tachyon
+configure	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def configure(self, filename):$/;"	member	line:147	class:Tachyon
+calibrate	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def calibrate(self, target=100, auto_off=1):$/;"	member	line:157	class:Tachyon
+start_calibration	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def start_calibration(self, target=100, auto_off=1):$/;"	member	line:173	class:Tachyon
+stop_calibration	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def stop_calibration(self):$/;"	member	line:181	class:Tachyon
+connect	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def connect(self):$/;"	member	line:193	class:Tachyon
+disconnect	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def disconnect(self):$/;"	member	line:205	class:Tachyon
+flush_buffer	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def flush_buffer(self):$/;"	member	line:216	class:Tachyon
+read_frame	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def read_frame(self):$/;"	member	line:223	class:Tachyon
+parse_header	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def parse_header(self, header):$/;"	member	line:234	class:Tachyon
+update_background	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def update_background(self, frame):$/;"	member	line:247	class:Tachyon
+process_frame	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    def process_frame(self, frame):$/;"	member	line:254	class:Tachyon
+tachyon	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/tachyon.py	/^    tachyon = Tachyon()$/;"	variable	line:270	class:Tachyon
+format	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^                    format='(%(threadName)-10s) %(message)s')$/;"	variable	line:17
+thermal_colormap	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^def thermal_colormap(levels=1024):$/;"	function	line:20
+LUT_IRON	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^LUT_IRON = thermal_colormap()$/;"	variable	line:42
+NitDat	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^class NitDat():$/;"	class	line:45
+__init__	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def __init__(self):$/;"	member	line:46	class:NitDat
+read_file	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def read_file(self, filename):$/;"	member	line:56	class:NitDat
+parse_header	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def parse_header(self, header):$/;"	member	line:71	class:NitDat
+compose_header	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def compose_header(self, rows, cols):$/;"	member	line:89	class:NitDat
+write_file	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def write_file(self, frames, filename):$/;"	member	line:101	class:NitDat
+read_config	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def read_config(self, filename='config.yml'):$/;"	member	line:110	class:NitDat
+write_config	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def write_config(self, filename='config.yml'):$/;"	member	line:119	class:NitDat
+set_filenames	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def set_filenames(self, filename):$/;"	member	line:128	class:NitDat
+read_frames	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def read_frames(self, filename):$/;"	member	line:138	class:NitDat
+read_pictures	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def read_pictures(self, filename1, filename2):$/;"	member	line:153	class:NitDat
+read_labels	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def read_labels(self, nframes):$/;"	member	line:162	class:NitDat
+write_labels	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def write_labels(self, data_labels):$/;"	member	line:171	class:NitDat
+laser_status	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def laser_status(self, keyvals, thr=200):$/;"	member	line:175	class:NitDat
+update_background	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def update_background(self, frame):$/;"	member	line:184	class:NitDat
+process_frame	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def process_frame(self, frame):$/;"	member	line:191	class:NitDat
+process_frames	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def process_frames(self, frames, offset=1000):$/;"	member	line:202	class:NitDat
+find_keyhole	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def find_keyhole(self, frames):$/;"	member	line:208	class:NitDat
+find_seam	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def find_seam(self, frames, offset=0, row=18, col=12, thr=69):$/;"	member	line:216	class:NitDat
+scale_frame	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def scale_frame(self, frame):$/;"	member	line:236	class:NitDat
+get_roi	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def get_roi(self, frame):$/;"	member	line:240	class:NitDat
+filter_data	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def filter_data(self, filename, out_name=None, offset=1000):$/;"	member	line:244	class:NitDat
+get_frames_pnt	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def get_frames_pnt(self, frames, row=None, col=None):$/;"	member	line:258	class:NitDat
+get_frames_row	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def get_frames_row(self, frames, row=None):$/;"	member	line:265	class:NitDat
+get_frames_col	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def get_frames_col(self, frames, col=None):$/;"	member	line:270	class:NitDat
+get_frames_roi	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def get_frames_roi(self, frames):$/;"	member	line:275	class:NitDat
+get_frames_data	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def get_frames_data(self, frames):$/;"	member	line:279	class:NitDat
+plot_keyhole	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def plot_keyhole(self, frames, row=None, col=None):$/;"	member	line:283	class:NitDat
+plot_seam	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    def plot_seam(self, frames):$/;"	member	line:298	class:NitDat
+parser	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    parser = argparse.ArgumentParser()$/;"	variable	line:318	class:NitDat
+args	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    args = parser.parse_args()$/;"	variable	line:320	class:NitDat
+dat	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    dat = NitDat()$/;"	variable	line:328	class:NitDat
+frames	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    frames = dat.read_frames(filename)$/;"	variable	line:329	class:NitDat
+seam	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    seam = dat.process_frames(frames)$/;"	variable	line:331	class:NitDat
+frame	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    frame = seam[len(seam)\/2]$/;"	variable	line:337	class:NitDat
+img	/home/jorge/catkin_ws/src/mashes/mashes_tachyon/src/tachyon/nitdat.py	/^    img = cv2.cvtColor(LUT_IRON[frame], cv2.COLOR_RGB2BGR)$/;"	variable	line:343	class:NitDat
