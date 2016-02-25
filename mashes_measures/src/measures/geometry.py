@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from pylab import *
 import cv2
+import math
 
 
 class Geometry():
@@ -15,7 +16,8 @@ class Geometry():
 
     def binarize(self, frame):
         """Image binarization."""
-        _, img_bin = cv2.threshold(frame, self.threshold, 255, cv2.THRESH_BINARY)
+        _, img_bin = cv2.threshold(frame, self.threshold, 255,
+                                   cv2.THRESH_BINARY)
         cv2.imshow('ImageWindow_bin', img_bin)
         return img_bin
 
@@ -23,14 +25,18 @@ class Geometry():
         """Find the main countour"""
         contours, hierarchy = cv2.findContours(frame, cv2.RETR_TREE,
                                                cv2.CHAIN_APPROX_SIMPLE)
-        #find max area
-        areas = [cv2.contourArea(cnt) for cnt in contours]
-        max_area = max(areas)
-        if (max_area > 5):
-                index_area = areas.index(max_area)
-                cnt = contours[index_area]
-                return cnt
-        return None
+        cnt_len = len(contours)
+        if cnt_len > 0:
+            #find max area
+            areas = [cv2.contourArea(cnt) for cnt in contours]
+            max_area = max(areas)
+            if (max_area > 5):
+                    index_area = areas.index(max_area)
+                    cnt = contours[index_area]
+                    return cnt
+            return None
+        else:
+            return None
 
     def find_ellipse(self, contour):
         """"Find ellipse as a contour"""
@@ -39,13 +45,13 @@ class Geometry():
 
 
 def find_geometry(frame):
-    clad = Geometry()
+    melt_pool = Geometry()
     # Pre-processing
-    img_grey = clad.greyscale(frame)
-    img_bin = clad.binarize(img_grey)
-    cnt = clad.find_contour(img_bin)
+    img_grey = melt_pool.greyscale(frame)
+    img_bin = melt_pool.binarize(img_grey)
+    cnt = melt_pool.find_contour(img_bin)
     if cnt is not None:
-        ellipse = clad.find_ellipse(cnt)
+        ellipse = melt_pool.find_ellipse(cnt)
         (x, y), (h, v), angle = ellipse
         angle_rads = math.radians(angle)
         major_axis = max(h, v)
@@ -59,42 +65,6 @@ def find_geometry(frame):
 
 if __name__ == '__main__':
     img = cv2.imread('../../../../../../files/13_bag/frame0465.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0466.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0467.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0468.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0469.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0470.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0471.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0472.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0473.jpg')
-    (major_axis, minor_axis, angle_rads) = find_geometry(img)
-    print major_axis, minor_axis, angle_rads
-
-    img = cv2.imread('../../../../../../files/13_bag/frame0474.jpg')
     (major_axis, minor_axis, angle_rads) = find_geometry(img)
     print major_axis, minor_axis, angle_rads
 
