@@ -1,9 +1,12 @@
 # Measures
 
-Measurements: area, length, width, orientation.
+Measurements: image, major_axis, minor_axis, orientation.
 
-Eccentricity: deviation coefficient from the circular shape.
 
-e = sqrt(1 – b2 / a2)
-a: length of the semi-major axis
-b: length of the semi-minor axis
+Call geometry.py
+
+	def find_geometry(frame):
+		cnt=melt_pool.find_contour(img_bin)
+		if cnt is not None:
+			ellipse = melt_pool.find_ellipse(cnt)
+			(x, y), (h, v), angle = ellipse
