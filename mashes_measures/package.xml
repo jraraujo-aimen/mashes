@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package>
   <name>mashes_measures</name>
-  <version>0.2.0</version>
+  <version>0.3.0</version>
   <description>The mashes_measures package.</description>
-  <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
+  <maintainer email="noemi.otero@aimen.es">Noemí Otero Carrbón</maintainer>
   <license>TODO</license>
 
   <!-- <url type="website">http://wiki.ros.org/mashes_tachyon</url> -->

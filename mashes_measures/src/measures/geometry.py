@@ -68,7 +68,31 @@ if __name__ == '__main__':
     (major_axis, minor_axis, angle_rads) = find_geometry(img)
     print major_axis, minor_axis, angle_rads
 
+    img = cv2.imread('../../../../../../files/13_bag/frame0467.jpg')
+    (major_axis, minor_axis, angle_rads) = find_geometry(img)
+    print major_axis, minor_axis, angle_rads
+
+    img = cv2.imread('../../../../../../files/13_bag/frame0468.jpg')
+    (major_axis, minor_axis, angle_rads) = find_geometry(img)
+    print major_axis, minor_axis, angle_rads
+
+    img = cv2.imread('../../../../../../files/13_bag/frame0470.jpg')
+    (major_axis, minor_axis, angle_rads) = find_geometry(img)
+    print major_axis, minor_axis, angle_rads
+
     img = cv2.imread('../../../../../../files/13_bag/frame0475.jpg')
+    (major_axis, minor_axis, angle_rads) = find_geometry(img)
+    print major_axis, minor_axis, angle_rads
+
+    img = cv2.imread('../../../../../../files/13_bag/frame0478.jpg')
+    (major_axis, minor_axis, angle_rads) = find_geometry(img)
+    print major_axis, minor_axis, angle_rads
+
+    img = cv2.imread('../../../../../../files/13_bag/frame0480.jpg')
+    (major_axis, minor_axis, angle_rads) = find_geometry(img)
+    print major_axis, minor_axis, angle_rads
+
+    img = cv2.imread('../../../../../../files/13_bag/frame0482.jpg')
     (major_axis, minor_axis, angle_rads) = find_geometry(img)
     print major_axis, minor_axis, angle_rads
 
