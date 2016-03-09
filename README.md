@@ -50,12 +50,12 @@ To play a bag file with the simultaneous recorded data:
 roslaunch mashes_workcell mashes_bagplay.launch filename:=data.bag
 ```
 
-where data.bag is the absolute file path. 
+where data.bag is the absolute file path.
 
 ## Acknowledgement
 
-This work is been supported by the European Commission through the research project
-"Multimodal spectrAl control of laSer processing with cognitivE abilities (MAShES)",
-H2020-FoF-2014 - Grant Agreement Nº 637081.
+This work is been supported by the European Commission through the research
+project "Multimodal spectrAl control of laSer processing with cognitivE
+abilities (MAShES)", H2020-FoF-2014 - Grant Agreement Nº 637081.
 
 [http://www.mashesproject.eu/](http://www.mashesproject.eu/)

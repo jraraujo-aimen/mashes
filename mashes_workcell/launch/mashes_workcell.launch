@@ -1,7 +1,7 @@
 <launch>
     <arg name="gui" default="True" />
 
-    <arg name="model" value="$(find etna_workcell)/urdf/mashes_workcell.xacro" />
+    <arg name="model" value="$(find mashes_workcell)/urdf/mashes_workcell.xacro" />
     <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
     <param name="publish_frequency" type="double" value="10.0" />  
      
