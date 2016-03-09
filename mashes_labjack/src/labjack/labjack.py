@@ -12,13 +12,14 @@ class LabJack():
         self.go = True
         self.openu3()
 
-
     def openu3(self):
         print "Opening LabJack...",
         try:
             self.dac = u3.U3()
             print "Done"
-            # Print "This program will attempt to generate a sine wave with a frequency of %s Hz, updating once every %s seconds." % (FREQUENCY, UPDATE_INTERVAL)
+            # Print "This program will attempt to generate a sine wave with a
+            #frequency of %s Hz, updating once every %s seconds." % (FREQUENCY,
+            #UPDATE_INTERVAL)
         except:
             print 'The device may be not connected'
 
@@ -42,15 +43,14 @@ class LabJack():
         self.go = False
 
     def output(self, value):
-         self.dac.writeRegister(5000, value)
+        self.dac.writeRegister(5000, value)
 
-    def triangular(self,maxim):
+    def triangular(self, maxim):
         while(1):
-            for k in np.linspace(0,maxim,10):
+            for k in np.linspace(0, maxim, 10):
                 dacs.output(k)
                 time.sleep(1)
-            k=0
-
+            k = 0
 
     def handleSetDac(self, signum, frame):
         # This function gets called every UPDATE_INTERVAL seconds.
@@ -73,7 +73,8 @@ class LabJack():
             self.degToRad = ((2*math.pi) / 360)
 
             signal.signal(signal.SIGALRM, self.handleSetDac)
-            signal.setitimer(signal.ITIMER_REAL, UPDATE_INTERVAL, UPDATE_INTERVAL)
+            signal.setitimer(signal.ITIMER_REAL, UPDATE_INTERVAL,
+                             UPDATE_INTERVAL)
 
             while (1):
                 # Wait for signal to be received
