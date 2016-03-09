@@ -1,14 +1,15 @@
 <launch>
   <param name="/use_sim_time" value="true"/>
 
+  <arg name="gui" default="True" />
   <arg name="filename" default="test.bag" />
   <node name="player" pkg="rosbag" type="play" output="screen" args="$(arg filename) --clock" />
 
-  <node name="viewer_nir" pkg="image_view" type="image_view">
+  <node name="viewer_nir" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/camera/image" />
   </node>
 
-  <node name="viewer_nit" pkg="image_view" type="image_view">
+  <node name="viewer_nit" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/tachyon/image" />
   </node>
 
@@ -17,5 +18,5 @@
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mashes_workcell)/config/workcell.rviz" required="true" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mashes_workcell)/config/workcell.rviz" required="true" if="$(arg gui)" />
 </launch>
