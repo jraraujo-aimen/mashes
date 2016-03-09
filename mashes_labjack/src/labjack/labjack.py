@@ -12,6 +12,7 @@ class LabJack():
         self.go = True
         self.openu3()
 
+
     def openu3(self):
         print "Opening LabJack...",
         try:
@@ -32,6 +33,7 @@ class LabJack():
     def setDac(self):
         # calculate the value to put in the sin
         value = (self.setDacCount * self.step) * self.degToRad
+
         self.dac.writeRegister(5000, 2+2*math.sin(value))
         # Count measures how many successful updates occurred.
         self.count += 1
@@ -41,6 +43,14 @@ class LabJack():
 
     def output(self, value):
          self.dac.writeRegister(5000, value)
+
+    def triangular(self,maxim):
+        while(1):
+            for k in np.linspace(0,maxim,10):
+                dacs.output(k)
+                time.sleep(1)
+            k=0
+
 
     def handleSetDac(self, signum, frame):
         # This function gets called every UPDATE_INTERVAL seconds.
@@ -60,7 +70,7 @@ class LabJack():
             self.step = float(360)/pbp
 
             # Stupid sin function only takes radians... but I think in degrees.
-            self.degToRad = ( (2*math.pi) / 360 )
+            self.degToRad = ((2*math.pi) / 360)
 
             signal.signal(signal.SIGALRM, self.handleSetDac)
             signal.setitimer(signal.ITIMER_REAL, UPDATE_INTERVAL, UPDATE_INTERVAL)
@@ -88,11 +98,12 @@ if __name__ == '__main__':
     dacs = LabJack()
     dacs.output(0)
 
-    for k in np.linspace(0,1,10):
-        dacs.output(k)
-        time.sleep(1)
-        print k
+    # for k in np.linspace(0,1,10):
+    #     dacs.output(k)
+    #     time.sleep(1)
+    #     print k
+    dacs.triangular(4)
 
-    dacs.singenerator(FREQUENCY, UPDATE_INTERVAL)
+    #dacs.singenerator(FREQUENCY, UPDATE_INTERVAL)
 
     dacs.close()

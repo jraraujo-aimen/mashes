@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mashes_labjack</name>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
   <description>The mashes_labjack package.</description>
   <maintainer email="veronica.panadeiro@aimen.es">Verónica Panadeiro</maintainer>
   <license>BSD</license>
@@ -11,9 +11,9 @@
   <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>
-  <build_depend>sensor_msgs</build_depend>         
+  <build_depend>sensor_msgs</build_depend>
   <build_depend>message_generation</build_depend>
-  
+
 
   <run_depend>roscpp</run_depend>
   <run_depend>rospy</run_depend>
