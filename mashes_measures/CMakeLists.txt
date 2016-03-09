@@ -16,7 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
  add_message_files(FILES
                    MsgGeometry.msg
                    MsgVelocity.msg)
-
 catkin_python_setup()
 
 generate_messages(
