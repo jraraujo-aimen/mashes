@@ -13,7 +13,7 @@
     <remap from="image" to="/tachyon/image" />
   </node>
 
-  <include file="$(find mashes_control)/launch/control.launch" />
+  <!--<include file="$(find mashes_control)/launch/control.launch" />-->
 
   <arg name="model" value="$(find etna_workcell)/urdf/mashes_workcell.xacro" />
   <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
