@@ -1,0 +1,12 @@
+<launch>
+
+  <node name="control" pkg="mashes_control" type="PubSubControl.py">
+  </node>
+
+  <node name="sublabjack" pkg="mashes_labjack" type="SubLabjack.py">
+  </node>
+
+  <node name="GUI" pkg="mashes_control" type="PubSubGUI.py">
+  </node>
+
+</launch>

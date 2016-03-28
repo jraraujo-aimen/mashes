@@ -5,7 +5,7 @@ import math
 from mashes_measures.msg import MsgGeometry
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
-from measures.code_geometry import Geometry
+from measures.geometry import Geometry
 
 
 class PubGeometry():
