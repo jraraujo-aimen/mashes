@@ -1,17 +1,17 @@
 <launch>
   <param name="/use_sim_time" value="true"/>
 
-  <arg name="gui" default="True" />
+  <arg name="gui" default="true" />
   <arg name="filename" default="test.bag" />
   <node name="player" pkg="rosbag" type="play" output="screen" args="$(arg filename) --clock -r 0.5" />
 
-  <node name="viewer_nir" pkg="image_view" type="image_view" if="$(arg gui)">
+  <!-- <node name="viewer_nir" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/camera/image" />
   </node>
 
   <node name="viewer_nit" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/tachyon/image" />
-  </node>
+  </node> -->
 
   <arg name="model" value="$(find etna_workcell)/urdf/mashes_workcell.xacro" />
   <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />

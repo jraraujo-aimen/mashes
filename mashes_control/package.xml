@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mashes_control</name>
-  <version>0.0.1</version>
+  <version>0.1.0</version>
   <description>The mashes_control package.</description>
   <maintainer email="veronica.panadeiro@aimen.es">Verónica Panadeiro</maintainer>
   <license>BSD</license>

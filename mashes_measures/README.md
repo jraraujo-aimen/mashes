@@ -1,6 +1,6 @@
 # Measures
 
-Measurements: image, major_axis, minor_axis, orientation.
+Measurements: major_axis, minor_axis, orientation.
 
 
 Call geometry.py

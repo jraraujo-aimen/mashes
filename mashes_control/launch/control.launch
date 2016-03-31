@@ -1,12 +1,21 @@
 <launch>
+  <arg name="gui" default="true" />
 
-  <node name="control" pkg="mashes_control" type="PubSubControl.py">
+  <node name="viewer_nit" pkg="image_view" type="image_view" if="$(arg gui)">
+    <remap from="image" to="/tachyon/image" />
   </node>
 
-  <node name="sublabjack" pkg="mashes_labjack" type="SubLabjack.py">
+  <node name="geometry" pkg="mashes_measures" type="PubGeometry.py">
+    <param name="image" type="str" value="/tachyon/image" />
   </node>
 
-  <node name="GUI" pkg="mashes_control" type="PubSubGUI.py">
-  </node>
+  <node name="rqt_plot1" pkg="rqt_plot" type="rqt_plot" args="/tachyon/geometry/major_axis /tachyon/geometry/minor_axis" if="$(arg gui)" />
 
+  <node name="control" pkg="mashes_control" type="PubSubControl.py" />
+
+  <node name="rqt_plot2" pkg="rqt_plot" type="rqt_plot" args="/control/power/value" if="$(arg gui)" />
+
+  <node name="sublabjack" pkg="mashes_labjack" type="SubLabjack.py" />
+
+  <node name="control_panel" pkg="mashes_control" type="qt_control.py" if="$(arg gui)" />
 </launch>
