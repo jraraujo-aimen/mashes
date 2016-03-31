@@ -15,6 +15,8 @@ from python_qt_binding import QtGui
 from python_qt_binding import QtCore
 
 
+MANUAL = 0
+AUTOMATIC = 1
 path = rospkg.RosPack().get_path('mashes_control')
 
 
@@ -31,7 +33,7 @@ class QtControl(QtGui.QWidget):
         self.pub_control = rospy.Publisher(
             'control/parameters', MsgControl, queue_size=10)
 
-        self.mode = 0
+        self.mode = MANUAL
         self.msg_mode = MsgMode()
         self.msg_power = MsgPower()
         self.msg_control = MsgControl()
@@ -41,19 +43,19 @@ class QtControl(QtGui.QWidget):
         rospy.Subscriber('/tachyon/geometry', MsgGeometry, self.cb_geometry, queue_size=1)
 
     def cb_geometry(self, msg_geometry):
-        self.lblInfo.setText("major_axis: %.2f" %msg_geometry.major_axis)
+        self.lblInfo.setText("Minor axis: %.2f\nMajor axis: %.2f" % (msg_geometry.minor_axis, msg_geometry.major_axis))
 
     def btnModeClicked(self):
-        if self.mode:
-            self.lblStatus.setText("Auto")
-            self.lblStatus.setStyleSheet("background-color: rgb(0, 0, 255); color: rgb(255, 255, 255);")
-            self.btnMode.setText("Manual")
-            self.mode = 0
-        else:
+        if self.mode == AUTOMATIC:
             self.lblStatus.setText("Manual")
             self.lblStatus.setStyleSheet("background-color: rgb(255, 0, 0); color: rgb(255, 255, 255);")
             self.btnMode.setText("Auto")
-            self.mode = 1
+            self.mode = MANUAL
+        elif self.mode == MANUAL:
+            self.lblStatus.setText("Auto")
+            self.lblStatus.setStyleSheet("background-color: rgb(0, 0, 255); color: rgb(255, 255, 255);")
+            self.btnMode.setText("Manual")
+            self.mode = AUTOMATIC
         self.msg_mode.value = self.mode
         self.pub_mode.publish(self.msg_mode)
 

@@ -1,11 +1,32 @@
 
-import cv2
+import yaml
 import numpy as np
 
 
 class Control():
     def __init__(self):
-        pass
+        self.pid = PID()
+
+    def load_conf(self, filename):
+        with open(filename, 'r') as f:
+            data = yaml.load(f)
+        Kp = data['parameters']['Kp']
+        Ki = data['parameters']['Ki']
+        Kd = data['parameters']['Kd']
+        pwr_min = data['power']['min']
+        pwr_max = data['power']['max']
+        self.pid.setParameters(Kp, Ki, Kd)
+        self.pid.setLimits(pwr_min, pwr_max)
+        return data
+
+    def save_conf(self, filename):
+        Kp, Ki, Kd = self.pid.Kp, self.pid.Ki, self.pid.Kd
+        pwr_min, pwr_max = self.pid.pwr_min, self.pid.pwr_max
+        data = dict(parameters=dict(Kp=Kp, Ki=Ki, Kd=Kd),
+                    power=dict(min=pwr_min, max=pwr_max))
+        with open(filename, 'w') as f:
+            f.write(yaml.dump(data))
+        return data
 
     def auto_output(self, power_value, set_point):
         k = 1.0033
@@ -23,88 +44,52 @@ class Control():
 
 
 class PID():
-    """
-    Discrete PID control
-    """
-
-    def __init__(self, P=1.0, I=1.0, D=1.0, Derivator=0, Integrator=0,
-                 Integrator_max=10, Integrator_min=-10):
-        self.Kp = P
-        self.Ki = I
-        self.Kd = D
-        self.Derivator = Derivator
-        self.Integrator = Integrator
-        self.Integrator_max = Integrator_max
-        self.Integrator_min = Integrator_min
+    def __init__(self):
+        self.setParameters(1.0, 1.0, 0.0)
+        self.setLimits(0, 1500)
+        self.Integrator_max = 10
+        self.Integrator_min = -10
         self.set_point = 0.0
         self.error = 0.0
 
-    def update(self, current_value):
-        """
-        Calculate PID output value for given reference input and feedback
-        """
-        self.error = self.set_point - current_value
-        print 'current_value'
-        print current_value
-        print 'error'
-        print self.error
-        self.P_value = self.Kp * (self.error)
-        print 'parte proporcional'
-        print self.P_value
-        self.D_value = self.Kd * (self.error - self.Derivator)
-        print 'parte derivativa'
-        print self.D_value
-        self.Derivator = self.error
-        self.Integrator = self.Integrator + self.error
-        if self.Integrator > self.Integrator_max:
-            self.Integrator = self.Integrator_max
-        elif self.Integrator < self.Integrator_min:
-            self.Integrator = self.Integrator_min
-
-        self.I_value = self.Integrator * self.Ki
-        print 'parte integradora'
-        print self.I_value
-
-        PID = self.P_value + self.I_value + self.D_value
-        print 'valor final'
-        print PID
-        if PID > 1500:
-            PID = 1500
-        if PID < 0:
-            PID = 0
-        return PID
-
     def setPoint(self, set_point):
         self.set_point = set_point
-        self.Integrator = 0
-        self.Derivator = 0
 
-    def setIntegrator(self, Integrator):
-        self.Integrator = Integrator
+    def setParameters(self, Kp, Ki, Kd):
+        self.Kp = Kp
+        self.Ki = Ki
+        self.Kd = Kd
 
-    def setDerivator(self, Derivator):
-        self.Derivator = Derivator
+    def setLimits(self, pwr_min, pwr_max):
+        self.pwr_min = pwr_min
+        self.pwr_max = pwr_max
 
-    def setKp(self, P):
-        self.Kp = P
+    def update(self, current_value):
+        self.error = self.set_point - current_value
+        print 'error', self.error
+        P = self.Kp * self.error
+        print 'Proportional:', P
+        I = self.Ki
+        print 'Integral:', I
+        # self.Integrator = self.Integrator + self.error
+        # if self.Integrator > self.Integrator_max:
+        #     self.Integrator = self.Integrator_max
+        # elif self.Integrator < self.Integrator_min:
+        #     self.Integrator = self.Integrator_min
+        D = self.Kd  # D_value = self.Kd * (self.error - self.Derivator)
+        print 'Derivative', D
+        # self.Derivator = self.error
+        PID = P + I + D
+        print 'PID', PID
+        if PID > self.pwr_max:
+            PID = self.pwr_max
+        if PID < self.pwr_min:
+            PID = self.pwr_min
+        return PID
 
-    def setKi(self, I):
-        self.Ki = I
-
-    def setKd(self, D):
-        self.Kd = D
-
-    def getPoint(self):
-        return self.set_point
-
-    def getError(self):
-        return self.error
-
-    def getIntegrator(self):
-        return self.Integrator
-
-    def getDerivator(self):
-        return self.Derivator
 
 if __name__ == '__main__':
+    filename = '../../config/control.yaml'
     control = Control()
+    control.save_conf(filename)
+    print control.load_conf(filename)

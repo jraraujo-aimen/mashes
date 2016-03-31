@@ -1,5 +1,8 @@
 #!/usr/bin/env python
+import os
 import rospy
+import rospkg
+
 #from std_msgs.msg import String
 from mashes_control.msg import MsgMode
 from mashes_control.msg import MsgControl
@@ -9,6 +12,11 @@ from mashes_measures.msg import MsgGeometry
 
 from control.control import Control
 from control.control import PID
+
+
+MANUAL = 0
+AUTOMATIC = 1
+path = rospkg.RosPack().get_path('mashes_control')
 
 
 class PubSubControl():
@@ -28,14 +36,12 @@ class PubSubControl():
         self.msg_power = MsgPower()
         self.msg_labjack = MsgLabJack()
 
-        self.mode = 0
+        self.mode = MANUAL
         self.set_point = 0
 
         self.control = Control()
-        self.PID = PID()
-        # self.PID.setKp(kp)
-        # self.PID.setKd(kd)
-        # self.PID.setKi(ki)
+        self.control.load_conf(os.path.join(path, 'config/control.yaml'))
+        self.control.pid.setPoint(self.set_point)
 
         rospy.spin()
 
@@ -45,19 +51,25 @@ class PubSubControl():
 
     def cb_control(self, msg_control):
         self.set_point = msg_control.set_point
+        # Kp = msg_control.kp
+        # Ki = msg_control.ki
+        # Kd = msg_control.kd
+        self.control.pid.setPoint(self.set_point)
+        # self.control.pid.setParameters(Kp, Ki, Kd)
         rospy.loginfo('Set Point: ' + str(self.set_point))
 
     def cb_geometry(self, msg_geo):
-        if self.mode:
+        if self.mode == MANUAL:
             self.msg_power.value = self.set_point
-        else:
+        elif self.mode == AUTOMATIC:
             minor_axis = msg_geo.minor_axis
-            major_axis = msg_geo.major_axis
-            value = self.PID.update(minor_axis * 214.28)
-            #power_out = self.control.auto_output(self.power, self.set_point)
-            #self.msg_labjack.value = power_out
-            print 'Power:', value
+            value = self.control.pid.update(minor_axis)
+            print 'Power (minor_axis):', value
             self.msg_power.value = value
+        else:
+            major_axis = msg_geo.major_axis
+            value = self.control.pid.update(major_axis)
+            print 'Power (major axis):', value
         self.pub_power.publish(self.msg_power)
 
 
