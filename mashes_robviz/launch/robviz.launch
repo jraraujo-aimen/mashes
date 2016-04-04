@@ -1,0 +1,11 @@
+<launch>
+    <include file="$(find mashes_workcell)/launch/mashes_workcell.launch">
+      <arg name="gui" value="false" />
+    </include>
+    <!-- <include file="$(find etna_triangulation)/launch/camera_profile.launch" /> -->
+    <include file="$(find mashes_control)/launch/control.launch">
+      <arg name="gui" value="false" />
+    </include>
+
+    <node name="robviz" pkg="mashes_robviz" type="robviz.py"/>
+</launch>

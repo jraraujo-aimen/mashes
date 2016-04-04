@@ -59,6 +59,7 @@ class PubSubControl():
         rospy.loginfo('Set Point: ' + str(self.set_point))
 
     def cb_geometry(self, msg_geo):
+        print 'Stamp:', msg_geo.header.stamp
         if self.mode == MANUAL:
             self.msg_power.value = self.set_point
         elif self.mode == AUTOMATIC:

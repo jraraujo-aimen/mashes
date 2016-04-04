@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-import rospy
 import cv2
-import math
+import rospy
 from mashes_measures.msg import MsgGeometry
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -27,8 +26,8 @@ class PubGeometry():
         try:
             stamp = data.header.stamp
             frame = self.bridge.imgmsg_to_cv2(data)
-            if data.encoding == 'mono8':
-                frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+            if data.encoding == 'rgb8':
+                frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
             major_axis, minor_axis, angle = self.geometry.find_geometry(frame)
             self.msg_geo.header.stamp = stamp
             self.msg_geo.major_axis = major_axis
