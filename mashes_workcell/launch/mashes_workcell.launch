@@ -1,13 +1,14 @@
 <launch>
-    <arg name="gui" default="True" />
+    <arg name="gui" default="true" />
+    <arg name="sim" default="false" />
 
     <arg name="model" value="$(find mashes_workcell)/urdf/mashes_workcell.xacro" />
     <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
-    <param name="publish_frequency" type="double" value="10.0" />  
-     
+    <!-- <param name="publish_frequency" type="double" value="10.0" />   -->
+
     <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
 
-    <include file="$(find abb_driver)/launch/robot_interface.launch">
+    <include file="$(find abb_driver)/launch/robot_interface.launch" unless="$(arg sim)">
         <arg name="robot_ip" value="192.168.30.4" />
         <arg name="J23_coupled" value="true" />
     </include>

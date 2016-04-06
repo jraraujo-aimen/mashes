@@ -1,2 +1,2 @@
 Header header
-float64 speed
+float32 speed

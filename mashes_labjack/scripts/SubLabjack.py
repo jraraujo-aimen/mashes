@@ -1,29 +1,35 @@
 #!/usr/bin/env python
+import os
 import rospy
-from mashes_labjack.msg import MsgLabJack
+import rospkg
+
+from mashes_control.msg import MsgPower
 
 from labjack.labjack import LabJack
-from laser.laser import Laser
+
+
+path = rospkg.RosPack().get_path('mashes_labjack')
 
 
 class SubLabjack():
     def __init__(self):
-        self.dacs = LabJack()
-        self.las = Laser()
+        rospy.init_node('sub_labjack')
 
-    def callback(self, msg_labjack):
-        rospy.loginfo(rospy.get_caller_id() + "Value %.2f", msg_labjack.value)
-        output = msg_labjack.value * self.las.factor
-        rospy.loginfo(output)
-        self.dacs.output(output)
+        self.labjack = LabJack()
+        config_file = rospy.get_param('~config', 'labjack.yml')
+        self.labjack.load_config(os.path.join(path, 'config', config_file))
 
-    def run(self):
-        rospy.init_node('sublabjack')
-        rospy.Subscriber("/control/out", MsgLabJack, self.callback)
-        # spin() simply keeps python from exiting until this node is stopped
+        rospy.Subscriber("/control/power", MsgPower, self.cb_power)
         rospy.spin()
+
+    def cb_power(self, msg_power):
+        output = self.labjack.factor * msg_power.value
+        rospy.loginfo("Power: %.2f, Output: %.2f", msg_power.value, output)
+        self.labjack.output(output)
 
 
 if __name__ == '__main__':
-    subla = SubLabjack()
-    subla.run()
+    try:
+        SubLabjack()
+    except rospy.ROSInterruptException:
+        pass

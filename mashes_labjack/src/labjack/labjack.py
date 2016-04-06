@@ -1,16 +1,28 @@
-import math # For sin function
-import signal # For timing
-from datetime import datetime # For printing times
+import yaml
+import math
+import signal
 
 import u3
 
 
 class LabJack():
     def __init__(self):
+        self.power_factor(0, 1500)
         self.count = 0
         self.setDacCount = 0
         self.go = True
         self.openu3()
+
+    def load_config(self, filename):
+        with open(filename, "r") as ymlfile:
+            cfg = yaml.load(ymlfile)
+        pwr_min = cfg['power']['min']
+        pwr_max = cfg['power']['max']
+        self.power_factor(pwr_min, pwr_max)
+
+    def power_factor(self, pwr_min, pwr_max):
+        self.factor = 5.0 / (pwr_max - pwr_min)
+        return self.factor
 
     def openu3(self):
         print "Opening LabJack...",

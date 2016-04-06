@@ -1,0 +1,14 @@
+<launch>
+    <arg name="sim" default="false" />
+
+    <include file="$(find mashes_workcell)/launch/mashes_dataset.launch">
+      <arg name="gui" value="false" />
+      <arg name="sim" value="$(arg sim)" />
+    </include>
+
+    <include file="$(find mashes_control)/launch/control.launch">
+      <arg name="gui" value="false" />
+    </include>
+
+    <node name="robviz" pkg="mashes_robviz" type="robviz.py"/>
+</launch>
