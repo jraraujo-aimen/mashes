@@ -19,9 +19,9 @@ AUTOMATIC = 1
 path = rospkg.RosPack().get_path('mashes_control')
 
 
-class PubSubControl():
+class NdControl():
     def __init__(self):
-        rospy.init_node('pub_sub_control')
+        rospy.init_node('control')
 
         rospy.Subscriber(
             '/tachyon/geometry', MsgGeometry, self.cb_geometry, queue_size=1)
@@ -60,6 +60,7 @@ class PubSubControl():
 
     def cb_geometry(self, msg_geo):
         print 'Stamp:', msg_geo.header.stamp
+        print 'Time:', msg_geo.header.stamp.to_sec()
         if self.mode == MANUAL:
             self.msg_power.value = self.set_point
         elif self.mode == AUTOMATIC:
@@ -76,6 +77,6 @@ class PubSubControl():
 
 if __name__ == '__main__':
     try:
-        PubSubControl()
+        NdControl()
     except rospy.ROSInterruptException:
         pass

@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 import cv2
 import rospy
-from mashes_measures.msg import MsgGeometry
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
+from mashes_measures.msg import MsgGeometry
 from measures.geometry import Geometry
 
 
-class PubGeometry():
+class NdGeometry():
     def __init__(self):
-        rospy.init_node('pub_geometry', anonymous=True)
+        rospy.init_node('geometry')
 
         image_topic = rospy.get_param('~image', '/tachyon/image')
         rospy.Subscriber(image_topic, Image, self.callback, queue_size=1)
@@ -18,7 +18,9 @@ class PubGeometry():
         geo_topic = '/%s/geometry' % image_topic.split('/')[1]
         self.pub_geo = rospy.Publisher(geo_topic, MsgGeometry, queue_size=10)
         self.msg_geo = MsgGeometry()
-        self.geometry = Geometry()
+
+        threshold = rospy.get_param('~threshold', 127)
+        self.geometry = Geometry(threshold)
 
         rospy.spin()
 
@@ -40,6 +42,6 @@ class PubGeometry():
 
 if __name__ == '__main__':
     try:
-        PubGeometry()
+        NdGeometry()
     except rospy.ROSInterruptException:
         pass

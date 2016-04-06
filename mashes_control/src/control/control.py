@@ -29,8 +29,7 @@ class Control():
         return data
 
     def auto_output(self, power_value, set_point):
-        k = 1.0033
-        power_out = k*(set_point - power_value)
+        power_out = 1.0033*(set_point - power_value)
         if power_out > 1500.0:
             power_out = 1500.0
         if power_out < 0.0:

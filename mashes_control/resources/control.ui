@@ -70,7 +70,7 @@ color: rgb(255, 255, 255);</string>
          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
         </property>
         <item row="0" column="0">
-         <widget class="QLabel" name="lblPower_2">
+         <widget class="QLabel" name="lblPower">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -108,22 +108,25 @@ color: rgb(255, 255, 255);</string>
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QLabel" name="lblSetPoint">
+         <widget class="QLabel" name="lblWidth">
           <property name="text">
-           <string> Set Point: </string>
+           <string> Width:</string>
           </property>
          </widget>
         </item>
         <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="sbSetPoint">
+         <widget class="QDoubleSpinBox" name="sbWidth">
+          <property name="suffix">
+           <string> mm</string>
+          </property>
           <property name="decimals">
            <number>1</number>
           </property>
           <property name="maximum">
-           <double>10000.000000000000000</double>
+           <double>10.000000000000000</double>
           </property>
           <property name="value">
-           <double>1000.000000000000000</double>
+           <double>2.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -135,7 +138,11 @@ color: rgb(255, 255, 255);</string>
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QDoubleSpinBox" name="sbKp"/>
+         <widget class="QDoubleSpinBox" name="sbKp">
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
         </item>
         <item row="3" column="0">
          <widget class="QLabel" name="lblKi">
@@ -145,7 +152,11 @@ color: rgb(255, 255, 255);</string>
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QDoubleSpinBox" name="sbKi"/>
+         <widget class="QDoubleSpinBox" name="sbKi">
+          <property name="value">
+           <double>1.000000000000000</double>
+          </property>
+         </widget>
         </item>
         <item row="4" column="0">
          <widget class="QLabel" name="lblKd">
@@ -165,7 +176,7 @@ color: rgb(255, 255, 255);</string>
    <item>
     <widget class="QPushButton" name="btnControl">
      <property name="text">
-      <string>Send</string>
+      <string>Accept Parameters</string>
      </property>
     </widget>
    </item>
@@ -193,6 +204,9 @@ color: rgb(255, 255, 255);</string>
     <widget class="QLabel" name="lblInfo">
      <property name="text">
       <string>Info</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

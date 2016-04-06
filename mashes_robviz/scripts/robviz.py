@@ -13,7 +13,7 @@ import tf
 import rviz
 import numpy as np
 from std_msgs.msg import String
-#from mashes_measures.msg import MsgVelocity
+from mashes_measures.msg import MsgVelocity
 
 from qt_data import QtData
 from qt_param import QtParam
@@ -119,19 +119,16 @@ class Robviz(QtGui.QMainWindow):
 
         self.btnQuit.clicked.connect(self.btnQuitClicked)
 
-        # Timer
+        rospy.Subscriber('/velocity', MsgVelocity, self.cb_velocity, queue_size=1)
+
         # self.tmrInfo = QtCore.QTimer(self)
         # self.tmrInfo.timeout.connect(self.timeInfoEvent)
         # self.tmrInfo.start(100)
 
-        # Subscribers
-        #rospy.Subscriber('velocity', MsgVelocity, self.updateSpeed)
+    def cb_velocity(self, msg_velocity):
+        self.lblInfo.setText("Speed: %.1f mm/s" % (1000 * msg_velocity.speed))
 
     # def timeInfoEvent(self):
-    #     #cmd = self._detach_command()
-    #     #if not cmd == None:
-    #     #    if self.alasHead.client.send_command(cmd) == 0:
-    #     #        self._insert_command(cmd)
     #     print self.lblInfo.text()
 
     # def qtPartAccepted(self, path):
@@ -140,7 +137,6 @@ class Robviz(QtGui.QMainWindow):
     #     self.tabWidget.setCurrentWidget(self.qtPath)
 
     def btnQuitClicked(self):
-        # self.tmrInfo.stop()
         QtCore.QCoreApplication.instance().quit()
 
 

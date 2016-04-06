@@ -3,13 +3,12 @@ import numpy as np
 
 
 class Geometry():
-    def __init__(self):
-        self.threshold = 178
+    def __init__(self, threshold=127):
+        self.threshold = threshold
 
     def binarize(self, frame):
-        """Image binarization."""
-        _, img_bin = cv2.threshold(frame, self.threshold, 255,
-                                   cv2.THRESH_BINARY)
+        _, img_bin = cv2.threshold(
+            frame, self.threshold, 255, cv2.THRESH_BINARY)
         return img_bin
 
     def find_contour(self, frame):
@@ -38,7 +37,6 @@ class Geometry():
         cnt = self.find_contour(img_bin)
         if cnt is not None:
             ellipse = self.find_ellipse(cnt)
-
             (x, y), (h, v), angle = ellipse
             angle_rads = np.deg2rad(angle)
             major_axis = max(h, v)

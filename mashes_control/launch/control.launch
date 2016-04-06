@@ -5,13 +5,27 @@
     <remap from="image" to="/tachyon/image" />
   </node>
 
-  <node name="geometry" pkg="mashes_measures" type="PubGeometry.py">
+  <node name="geometry" pkg="mashes_measures" type="nd_geometry.py">
     <param name="image" type="str" value="/tachyon/image" />
   </node>
 
   <node name="rqt_plot1" pkg="rqt_plot" type="rqt_plot" args="/tachyon/geometry/major_axis /tachyon/geometry/minor_axis" if="$(arg gui)" />
 
-  <node name="control" pkg="mashes_control" type="PubSubControl.py" />
+  <!-- -->
+
+  <node name="viewer_nir" pkg="image_view" type="image_view" if="$(arg gui)">
+    <remap from="image" to="/camera/image" />
+  </node>
+
+  <node name="geometry_nir" pkg="mashes_measures" type="nd_geometry.py">
+    <param name="image" type="str" value="/camera/image" />
+  </node>
+
+  <node name="rqt_plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis" if="$(arg gui)" />
+
+  <!-- -->
+
+  <node name="control" pkg="mashes_control" type="nd_control.py" />
 
   <node name="rqt_plot2" pkg="rqt_plot" type="rqt_plot" args="/control/power/value" if="$(arg gui)" />
 

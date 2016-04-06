@@ -1,8 +1,11 @@
 <launch>
-    <include file="$(find mashes_workcell)/launch/mashes_workcell.launch">
+    <arg name="sim" default="false" />
+
+    <include file="$(find mashes_workcell)/launch/mashes_dataset.launch">
       <arg name="gui" value="false" />
+      <arg name="sim" value="$(arg sim)" />
     </include>
-    <!-- <include file="$(find etna_triangulation)/launch/camera_profile.launch" /> -->
+
     <include file="$(find mashes_control)/launch/control.launch">
       <arg name="gui" value="false" />
     </include>
