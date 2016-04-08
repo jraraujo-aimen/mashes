@@ -17,7 +17,6 @@ class Geometry():
             frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         cnt_len = len(contours)
         if cnt_len > 0:
-            #find max area
             areas = [cv2.contourArea(cnt) for cnt in contours]
             max_area = max(areas)
             if (max_area > 5):

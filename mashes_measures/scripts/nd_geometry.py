@@ -12,7 +12,7 @@ class NdGeometry():
         rospy.init_node('geometry')
 
         image_topic = rospy.get_param('~image', '/tachyon/image')
-        rospy.Subscriber(image_topic, Image, self.callback, queue_size=1)
+        rospy.Subscriber(image_topic, Image, self.cb_image, queue_size=1)
         self.bridge = CvBridge()
 
         geo_topic = '/%s/geometry' % image_topic.split('/')[1]
@@ -24,11 +24,11 @@ class NdGeometry():
 
         rospy.spin()
 
-    def callback(self, data):
+    def cb_image(self, msg_image):
         try:
-            stamp = data.header.stamp
-            frame = self.bridge.imgmsg_to_cv2(data)
-            if data.encoding == 'rgb8':
+            stamp = msg_image.header.stamp
+            frame = self.bridge.imgmsg_to_cv2(msg_image)
+            if msg_image.encoding == 'rgb8':
                 frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
             major_axis, minor_axis, angle = self.geometry.find_geometry(frame)
             self.msg_geo.header.stamp = stamp

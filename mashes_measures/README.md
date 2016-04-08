@@ -5,6 +5,12 @@
 The ellipse approach calculates this using the contours of the segmented shape,
 providing as measurements: major_axis, minor_axis, orientation.
 
+Steps:
+1. Binarize the image.
+2. Find contours.
+3. Approximate the ellipse.
+
+
 ```python
 def find_geometry(frame):
 	cnt=melt_pool.find_contour(img_bin)
@@ -30,8 +36,10 @@ a = DT / (RC + DT)
 fc = 1 / 2 * pi * RC
 ```
 
+```
 $\alpha = {\Delta T \over (RC + \Delta T)}$
 $f_c = {1 \over {2 \cdot \pi \cdot RC}}$
+```
 
 The smoothing factor is calculated from the cut-off frequency.
 
