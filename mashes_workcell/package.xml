@@ -4,7 +4,7 @@
   <version>0.2.0</version>
   <description>The mashes_workcell package</description>
   <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
-  <license>TODO</license>
+  <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 
