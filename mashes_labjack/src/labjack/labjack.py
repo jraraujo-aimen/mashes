@@ -25,18 +25,15 @@ class LabJack():
         return self.factor
 
     def openu3(self):
-        print "Opening LabJack...",
+        print 'Opening LabJack...'
         try:
             self.dac = u3.U3()
-            print "Done"
-            # Print "This program will attempt to generate a sine wave with a
-            #frequency of %s Hz, updating once every %s seconds." % (FREQUENCY,
-            #UPDATE_INTERVAL)
+            print 'Done'
         except:
             print 'The device may be not connected'
 
     def close(self):
-        print "Closing LabJack...",
+        print 'Closing LabJack...'
         try:
             self.dac.closeu3()
             print 'Done'
@@ -73,30 +70,30 @@ class LabJack():
         self.setDacCount += 1
 
     def singenerator(self, FREQUENCY, UPDATE_INTERVAL):
-            print "This program will attempt to generate a sine wave with a frequency of %s Hz, updating once every %s seconds." % (FREQUENCY, UPDATE_INTERVAL)
-            # Controls how fast the DAC will be updated, in seconds.
-            # Points between peaks (pbp)
-            pbp = (float(1)/FREQUENCY)/UPDATE_INTERVAL
+        print "This program will attempt to generate a sine wave with a frequency of %s Hz, updating once every %s seconds." % (FREQUENCY, UPDATE_INTERVAL)
+        # Controls how fast the DAC will be updated, in seconds.
+        # Points between peaks (pbp)
+        pbp = (float(1)/FREQUENCY)/UPDATE_INTERVAL
 
-            # Figure out how many degrees per update we need to go.
-            self.step = float(360)/pbp
+        # Figure out how many degrees per update we need to go.
+        self.step = float(360)/pbp
 
-            # Stupid sin function only takes radians... but I think in degrees.
-            self.degToRad = ((2*math.pi) / 360)
+        # Stupid sin function only takes radians... but I think in degrees.
+        self.degToRad = ((2*math.pi) / 360)
 
-            signal.signal(signal.SIGALRM, self.handleSetDac)
-            signal.setitimer(signal.ITIMER_REAL, UPDATE_INTERVAL,
-                             UPDATE_INTERVAL)
+        signal.signal(signal.SIGALRM, self.handleSetDac)
+        signal.setitimer(signal.ITIMER_REAL, UPDATE_INTERVAL,
+                         UPDATE_INTERVAL)
 
-            while (1):
-                # Wait for signal to be received
-                 # If the dacs flag is set, set the dac.
-                if dacs.go:
-                    self.setDac()
-            signal.setitimer(signal.ITIMER_REAL, 0)
+        while (1):
+            # Wait for signal to be received
+             # If the dacs flag is set, set the dac.
+            if dacs.go:
+                self.setDac()
+        signal.setitimer(signal.ITIMER_REAL, 0)
 
-            print "# of Updates = %s, # of1 signals = %s" % (dacs.count, dacs.setDacCount)
-            print "The closer the number of updates is to the number of signals, the better your waveform will be."
+        print "# of Updates = %s, # of1 signals = %s" % (dacs.count, dacs.setDacCount)
+        print "The closer the number of updates is to the number of signals, the better your waveform will be."
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from mashes_measures.msg import MsgGeometry
 
 
-class Viewer():
+class NdViewer():
     def __init__(self):
         rospy.init_node('measurements_viewer')
 
@@ -40,7 +40,7 @@ class Viewer():
                 self.frame = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
             else:
                 self.frame = cv2.cvtColor(self.frame, cv2.COLOR_RGB2BGR)
-            frame = cv2.resize(self.frame, (2 * self.frame.shape[1], 2 * self.frame.shape[0]))
+            frame = cv2.resize(self.frame, (256, 256))
             #cv2.ellipse(img_base_binary,(x_cm,y_cm),(length/2,width/2),rad2deg(angle),0,360,(0,255,0),1)
             cv2.imshow("viewer", frame)
             cv2.waitKey(1)
@@ -55,6 +55,6 @@ class Viewer():
 
 if __name__ == '__main__':
     try:
-        Viewer()
+        NdViewer()
     except rospy.ROSInterruptException:
         pass

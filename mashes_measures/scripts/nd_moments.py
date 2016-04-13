@@ -5,6 +5,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from mashes_measures.msg import MsgGeometry
 from measures.moments import Moments
+from measures.calibration import Calibration
 
 
 class NdMoments():
@@ -21,6 +22,7 @@ class NdMoments():
 
         threshold = rospy.get_param('~threshold', 127)
         self.moments = Moments(threshold)
+        self.calibration = Calibration(0.375)
 
         rospy.spin()
 
@@ -32,8 +34,8 @@ class NdMoments():
                 frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
             major_axis, minor_axis, angle = self.moments.find_geometry(frame)
             self.msg_geo.header.stamp = stamp
-            self.msg_geo.major_axis = major_axis
-            self.msg_geo.minor_axis = minor_axis
+            self.msg_geo.major_axis = self.calibration.correct(major_axis)
+            self.msg_geo.minor_axis = self.calibration.correct(minor_axis)
             self.msg_geo.orientation = angle
             self.pub_geo.publish(self.msg_geo)
         except CvBridgeError, e:

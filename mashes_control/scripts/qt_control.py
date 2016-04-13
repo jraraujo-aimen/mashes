@@ -62,29 +62,19 @@ class QtControl(QtGui.QWidget):
             self.lblStatus.setStyleSheet(
                 "background-color: rgb(255, 255, 0); color: rgb(0, 0, 0);")
             self.btnMode.setText("Auto")
-            self.lblWidth.hide()
-            self.sbWidth.hide()
-            self.lblPower.show()
-            self.sbPower.show()
             self.mode = MANUAL
         elif self.mode == MANUAL:
             self.lblStatus.setText("Auto")
             self.lblStatus.setStyleSheet(
                 "background-color: rgb(0, 0, 255); color: rgb(255, 255, 255);")
             self.btnMode.setText("Manual")
-            self.lblPower.hide()
-            self.sbPower.hide()
-            self.lblWidth.show()
-            self.sbWidth.show()
             self.mode = AUTOMATIC
         self.msg_mode.value = self.mode
         self.pub_mode.publish(self.msg_mode)
 
     def btnControlClicked(self):
-        if self.mode == MANUAL:
-            self.msg_control.set_point = self.sbPower.value()
-        else:
-            self.msg_control.set_point = self.sbWidth.value()
+        self.msg_control.power = self.sbPower.value()
+        self.msg_control.setpoint = self.sbWidth.value()
         self.msg_control.kp = self.sbKp.value()
         self.msg_control.ki = self.sbKi.value()
         self.msg_control.kd = self.sbKd.value()
