@@ -11,13 +11,15 @@ from labjack.labjack import LabJack
 path = rospkg.RosPack().get_path('mashes_labjack')
 
 
-class SubLabjack():
+class NdLabjack():
     def __init__(self):
-        rospy.init_node('sub_labjack')
+        rospy.init_node('labjack')
+
+        power_min = rospy.get_param('~power_min', 0)
+        power_max = rospy.get_param('~power_max', 1500)
 
         self.labjack = LabJack()
-        config_file = rospy.get_param('~config', 'labjack.yml')
-        self.labjack.load_config(os.path.join(path, 'config', config_file))
+        self.labjack.power_factor(power_min, power_max)
 
         rospy.Subscriber("/control/power", MsgPower, self.cb_power)
         rospy.spin()
@@ -30,6 +32,6 @@ class SubLabjack():
 
 if __name__ == '__main__':
     try:
-        SubLabjack()
+        NdLabjack()
     except rospy.ROSInterruptException:
         pass

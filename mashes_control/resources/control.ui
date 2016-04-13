@@ -103,7 +103,7 @@ color: rgb(255, 255, 255);</string>
            <double>10.000000000000000</double>
           </property>
           <property name="value">
-           <double>1200.000000000000000</double>
+           <double>1000.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -139,8 +139,11 @@ color: rgb(255, 255, 255);</string>
         </item>
         <item row="2" column="1">
          <widget class="QDoubleSpinBox" name="sbKp">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
           <property name="value">
-           <double>1.000000000000000</double>
+           <double>10.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -153,8 +156,11 @@ color: rgb(255, 255, 255);</string>
         </item>
         <item row="3" column="1">
          <widget class="QDoubleSpinBox" name="sbKi">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
           <property name="value">
-           <double>1.000000000000000</double>
+           <double>100.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -166,7 +172,11 @@ color: rgb(255, 255, 255);</string>
          </widget>
         </item>
         <item row="4" column="1">
-         <widget class="QDoubleSpinBox" name="sbKd"/>
+         <widget class="QDoubleSpinBox" name="sbKd">
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>

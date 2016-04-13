@@ -70,18 +70,16 @@ class Moments():
         if m00 > 1000:
             x_cm = m10 / m00
             y_cm = m01 / m00
-            # Rounded
-            m11 = m11 / 64 * 64
-            m20 = m20 / 64 * 64
-            m02 = m02 / 64 * 64
             # ---
             u20 = float(m20 / m00 - x_cm * x_cm)
             u02 = float(m02 / m00 - y_cm * y_cm)
             u11 = float(m11 / m00 - x_cm * y_cm)
-            lmax = (u20 + u02 + np.sqrt(4 * u11 * u11 + (u20 - u02) * (u20 - u02))) / 2
-            lmin = (u20 + u02 - np.sqrt(4 * u11 * u11 + (u20 - u02) * (u20 - u02))) / 2
+            lmax = (u20 + u02 + np.sqrt(
+                4 * u11 * u11 + (u20 - u02) * (u20 - u02))) / 2
+            lmin = (u20 + u02 - np.sqrt(
+                4 * u11 * u11 + (u20 - u02) * (u20 - u02))) / 2
             # ---
-            angle = np.arctan((2 * u11) / (u20 - u02)) / 2
+            angle = np.arctan((2 * u11) / (u20 - u02 + 0.0000001)) / 2
             length = 4 * np.sqrt(lmax)
             width = 4 * np.sqrt(lmin)
         return [x_cm, y_cm, angle, length, width]
@@ -95,8 +93,8 @@ class Moments():
 
 if __name__ == '__main__':
     import cv2
-    from pylab import *
-    from matplotlib.patches import Rectangle, Ellipse
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Ellipse
 
     img = cv2.imread('../../data/frame0015.jpg')
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -109,31 +107,29 @@ if __name__ == '__main__':
     print width, length, angle
 
     img_pix = moments.levels(img, 63, 191)
-    x_cm_pixel, y_cm_pixel, angle_pixel, length_pixel, width_pixel = moments.ellipse(img_pix)
-    print width_pixel, length_pixel, angle_pixel
+    px_cm, py_cm, pangle, plength, pwidth = moments.ellipse(img_pix)
+    print pwidth, plength, pangle
 
     left, top, right, bottom = moments.bounding_box(img)
     print right - left, bottom - top
 
-    figure()
-    subplot(221)
-    imshow(img_bin, cmap='gray')
-    axis('off')
-    subplot(222)
-    imshow(img_pix, cmap='gray')
-    axis('off')
-    subplot(223)
-    imshow(img_bin, cmap='gray')
-    axis('off')
-    gca().add_patch(Ellipse([x_cm, y_cm], length, width,
-                            angle=rad2deg(angle),
-                            facecolor='none',
-                            edgecolor='red', lw=1.5))
-    subplot(224)
-    imshow(img_pix, cmap='gray')
-    axis('off')
-    gca().add_patch(Ellipse([x_cm_pixel, y_cm_pixel],
-                            length_pixel, width_pixel,
-                            angle=rad2deg(angle_pixel),
-                            facecolor='none', edgecolor='red', lw=1.5))
-    show()
+    plt.figure()
+    plt.subplot(221)
+    plt.imshow(img_bin, cmap='gray')
+    plt.axis('off')
+    plt.subplot(222)
+    plt.imshow(img_pix, cmap='gray')
+    plt.axis('off')
+    plt.subplot(223)
+    plt.imshow(img_bin, cmap='gray')
+    plt.axis('off')
+    plt.gca().add_patch(Ellipse([x_cm, y_cm], length, width,
+                                angle=np.rad2deg(angle),
+                                facecolor='none', edgecolor='red', lw=1.5))
+    plt.subplot(224)
+    plt.imshow(img_pix, cmap='gray')
+    plt.axis('off')
+    plt.gca().add_patch(Ellipse([px_cm, py_cm], plength, pwidth,
+                                angle=np.rad2deg(pangle),
+                                facecolor='none', edgecolor='red', lw=1.5))
+    plt.show()

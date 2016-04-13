@@ -12,7 +12,7 @@ class NdVelocity():
         rospy.init_node('velocity')
 
         self.velocity_pub = rospy.Publisher(
-            'velocity', MsgVelocity, queue_size=5)
+            'velocity', MsgVelocity, queue_size=10)
 
         self.velocity = Velocity()
         self.msg_velocity = MsgVelocity()

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-import sys
 import rospy
 import rospkg
 import rosparam
@@ -14,8 +13,8 @@ import rviz
 import numpy as np
 from std_msgs.msg import String
 from mashes_measures.msg import MsgVelocity
+from mashes_measures.msg import MsgStatus
 
-from qt_data import QtData
 from qt_param import QtParam
 from qt_control import QtControl
 
@@ -104,12 +103,9 @@ class Robviz(QtGui.QMainWindow):
 
         self.boxPlot.addWidget(MyViz())
 
-        self.qtData = QtData()
         self.qtParam = QtParam()
         self.qtControl = QtControl()
 
-        # Add tabs
-        self.tabWidget.addTab(self.qtData, 'Data')
         self.tabWidget.addTab(self.qtParam, 'Parameters')
         self.tabWidget.addTab(self.qtControl, 'Control')
 
@@ -120,30 +116,37 @@ class Robviz(QtGui.QMainWindow):
         self.btnQuit.clicked.connect(self.btnQuitClicked)
 
         rospy.Subscriber('/velocity', MsgVelocity, self.cb_velocity, queue_size=1)
-
-        # self.tmrInfo = QtCore.QTimer(self)
-        # self.tmrInfo.timeout.connect(self.timeInfoEvent)
-        # self.tmrInfo.start(100)
+        rospy.Subscriber('/supervisor/status', MsgStatus, self.cb_status, queue_size=1)
 
     def cb_velocity(self, msg_velocity):
         self.lblInfo.setText("Speed: %.1f mm/s" % (1000 * msg_velocity.speed))
 
-    # def timeInfoEvent(self):
-    #     print self.lblInfo.text()
-
-    # def qtPartAccepted(self, path):
-    #     cmds = self.qtPath.jason.path2cmds(path)
-    #     [self.qtPath.insertCommand(cmd) for cmd in cmds]
-    #     self.tabWidget.setCurrentWidget(self.qtPath)
+    def cb_status(self, msg_status):
+        txt_status = ''
+        if msg_status.laser_on:
+            txt_status = 'Laser ON' + '\n'
+            # self.lblStatus.setStyleSheet(
+            #     "background-color: rgb(255, 255, 0); color: rgb(0, 0, 0);")
+        else:
+            txt_status = 'Laser OFF' + '\n'
+            # self.lblStatus.setStyleSheet(
+            #     "background-color: rgb(255, 255, 0); color: rgb(0, 0, 0);")
+        if msg_status.running:
+            txt_status = txt_status + 'Running'
+        else:
+            txt_status = txt_status + 'Stopped'
+        self.lblStatus.setText(txt_status)
 
     def btnQuitClicked(self):
         QtCore.QCoreApplication.instance().quit()
 
 
 if __name__ == '__main__':
+    import sys
+
     rospy.init_node('robviz')
 
     app = QtGui.QApplication(sys.argv)
     robviz = Robviz()
     robviz.show()
-    app.exec_()
+    sys.exit(app.exec_())
