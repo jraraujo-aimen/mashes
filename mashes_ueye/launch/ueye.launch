@@ -1,7 +1,7 @@
 <launch>
-  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />
+  <!--<node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />-->
 
-  <node pkg="nodelet" type="nodelet" name="ueye_cam_nodelet"
+  <node pkg="nodelet" type="nodelet" name="camera_nodelet"
         args="load ueye_cam/ueye_cam_nodelet nodelet_manager">
     <param name="camera_name" type="str" value="camera" />
     <param name="camera_topic" type="str" value="image" />
@@ -49,7 +49,7 @@
     <param name="pixel_clock" type="int" value="68" />
   </node>
 
-  <node name="viewer" pkg="image_view" type="image_view">
+  <node name="camera_viewer" pkg="image_view" type="image_view">
     <remap from="image" to="/camera/image" />
   </node>
 </launch>
