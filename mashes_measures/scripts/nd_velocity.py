@@ -7,11 +7,12 @@ from mashes_measures.msg import MsgVelocity
 from measures.velocity import Velocity
 
 
-class PubVelocity():
+class NdVelocity():
     def __init__(self):
-        rospy.init_node('pub_velocity')
+        rospy.init_node('velocity')
 
-        self.velocity_pub = rospy.Publisher('velocity', MsgVelocity, queue_size=5)
+        self.velocity_pub = rospy.Publisher(
+            'velocity', MsgVelocity, queue_size=10)
 
         self.velocity = Velocity()
         self.msg_velocity = MsgVelocity()
@@ -40,6 +41,6 @@ class PubVelocity():
 
 if __name__ == '__main__':
     try:
-        PubVelocity()
+        NdVelocity()
     except rospy.ROSInterruptException:
         pass

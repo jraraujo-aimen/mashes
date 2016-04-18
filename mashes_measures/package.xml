@@ -4,10 +4,7 @@
   <version>0.3.0</version>
   <description>The mashes_measures package.</description>
   <maintainer email="noemi.otero@aimen.es">Noemí Otero Carrbón</maintainer>
-  <license>TODO</license>
-
-  <!-- <url type="website">http://wiki.ros.org/mashes_tachyon</url> -->
-  <!-- <author email="jane.doe@example.com">Jane Doe</author> -->
+  <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>
 

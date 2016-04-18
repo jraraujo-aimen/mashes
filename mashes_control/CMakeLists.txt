@@ -11,10 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_message_files(
   FILES
-  MsgModo.msg
-  MsgLabJack.msg
+  MsgMode.msg
   MsgPower.msg
-  MsgPower_detected.msg
   MsgControl.msg
 )
 

@@ -1,7 +1,8 @@
 <launch>
+  <arg name="gui" default="true" />
+
   <param name="/use_sim_time" value="true"/>
 
-  <arg name="gui" default="True" />
   <arg name="filename" default="test.bag" />
   <node name="player" pkg="rosbag" type="play" output="screen" args="$(arg filename) --clock -r 0.5" />
 
@@ -13,10 +14,8 @@
     <remap from="image" to="/tachyon/image" />
   </node>
 
-  <arg name="model" value="$(find etna_workcell)/urdf/mashes_workcell.xacro" />
-  <param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" />
-
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
-
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find mashes_workcell)/config/workcell.rviz" required="true" if="$(arg gui)" />
+  <include file="$(find mashes_workcell)/launch/mashes_workcell.launch">
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="sim" value="true" />
+  </include>
 </launch>
