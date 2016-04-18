@@ -11,6 +11,7 @@ class LabJack():
         self.setDacCount = 0
         self.go = True
         self.openu3()
+        self.reg = 5000
 
     def openu3(self):
         print "Opening LabJack...",
@@ -35,7 +36,7 @@ class LabJack():
         # calculate the value to put in the sin
         value = (self.setDacCount * self.step) * self.degToRad
 
-        self.dac.writeRegister(5000, 2+2*math.sin(value))
+        self.dac.writeRegister(self.reg, 2+2*math.sin(value))
         # Count measures how many successful updates occurred.
         self.count += 1
 
@@ -43,11 +44,13 @@ class LabJack():
         self.go = False
 
     def output(self, value):
-        self.dac.writeRegister(5000, value)
+        self.dac.writeRegister(self.reg, value)
+    
 
     def triangular(self, maxim):
         while(1):
             for k in np.linspace(0, maxim, 10):
+                print k
                 dacs.output(k)
                 time.sleep(1)
             k = 0
@@ -97,13 +100,11 @@ if __name__ == '__main__':
     FREQUENCY = 10
 
     dacs = LabJack()
-    dacs.output(0)
 
-    # for k in np.linspace(0,1,10):
-    #     dacs.output(k)
-    #     time.sleep(1)
-    #     print k
-    dacs.triangular(4)
+    while(1):
+        dacs.output(1)
+
+    #dacs.triangular(4)
 
     #dacs.singenerator(FREQUENCY, UPDATE_INTERVAL)
 
