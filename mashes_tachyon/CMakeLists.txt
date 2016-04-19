@@ -8,13 +8,25 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
   sensor_msgs
   image_transport
+  message_generation
+)
+
+add_message_files(
+  FILES
+  MsgCalibrate.msg
 )
 
 catkin_python_setup()
 
-catkin_package()
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
+catkin_package(
+  CATKIN_DEPENDS message_runtime
+)
 
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
-

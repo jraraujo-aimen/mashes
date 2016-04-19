@@ -1,7 +1,7 @@
 <launch>
   <arg name="gui" default="true" />
 
-  <node name="tachyon" pkg="mashes_tachyon" type="pub_tachyon.py">
+  <node name="tachyon" pkg="mashes_tachyon" type="nd_tachyon.py">
     <param name="image" type="str" value="/tachyon/image" />
     <param name="mode" type="str" value="rgb8" />
     <param name="config" type="str" value="tachyon.yml" />
