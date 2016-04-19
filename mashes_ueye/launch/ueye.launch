@@ -1,4 +1,6 @@
 <launch>
+  <arg name="gui" default="true" />
+
   <!--<node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />-->
 
   <node pkg="nodelet" type="nodelet" name="camera_nodelet"
@@ -9,15 +11,7 @@
     <param name="camera_intrinsics_file" type="string" value="" /> <!-- default: ~/.ros/camera_info/<camera_name>.yaml -->
     <param name="camera_parameters_file" type="string" value="" /> <!-- default: ~/.ros/camera_conf/<camera_name>.ini -->
 
-    <param name="ext_trigger_mode" type="bool" value="False" /> <!-- if False, then camera will operate in free-run mode; otherwise, frames need to be triggered by hardware signal (falling-edge) on digital input pin of camera -->
-
-    <!-- the following are optional camera configuration parameters:
-         they will be loaded on the camera after the .ini configuration
-         file, and before dynamic_reconfigure. That means that any
-         (lingering) dynamic parameters from dynamic_reconfigure will
-         override these values, and that these will override parameters
-         from the .ini file.
-         See http://www.ros.org/wiki/ueye_cam for more details. -->
+    <param name="ext_trigger_mode" type="bool" value="False" />
 
     <param name="color_mode" type="str" value="mono8" />
 
@@ -49,7 +43,7 @@
     <param name="pixel_clock" type="int" value="68" />
   </node>
 
-  <node name="camera_viewer" pkg="image_view" type="image_view">
+  <node name="camera_viewer" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/camera/image" />
   </node>
 </launch>

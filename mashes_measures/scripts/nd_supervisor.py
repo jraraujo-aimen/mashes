@@ -31,7 +31,6 @@ class NdSupervisor():
 
     def cb_status(self):
         #stamp = rospy.Time.now()
-        rospy.loginfo('new topic')
         self.pub_status.publish(self.msg_status)
 
     def cb_geometry(self, msg_geometry):
