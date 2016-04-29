@@ -65,13 +65,12 @@ class PID():
         if self.time is None:
             output = self.output
         else:
-            error = self.set_setpoint - value
+            error = self.setpoint - value
             delta = time - self.time
             output = self.output + self.Kp * (error - self.error) + self.Ki * error * delta
             self.error = error
-            print 'Value', value, 'Time', time
+            print 'SetPoint', self.setpoint, 'Value', value, 'Time', time
             print 'Delta time', delta, 'Error', error
-            print 'Output', self.output
             if output > self.pwr_max:
                 output = self.pwr_max
             if output < self.pwr_min:

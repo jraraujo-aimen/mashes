@@ -17,8 +17,8 @@
 
     <param name="image_width" type="int" value="640" />
     <param name="image_height" type="int" value="512" />
-    <param name="image_top" type="int" value="0" />
-    <param name="image_left" type="int" value="0" />
+    <param name="image_top" type="int" value="170" />
+    <param name="image_left" type="int" value="485" />
 
     <param name="subsampling" type="int" value="1" />
     <param name="binning" type="int" value="4" />
