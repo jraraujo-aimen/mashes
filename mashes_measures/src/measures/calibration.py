@@ -8,6 +8,8 @@ class Calibration():
     def correct(self, value):
         return self.scale * value
 
+    def represent(self, value):
+        return value/self.scale
 
 if __name__ == '__main__':
     calibration = Calibration()

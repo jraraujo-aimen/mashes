@@ -40,9 +40,11 @@ class Geometry():
             angle_rads = np.deg2rad(angle)
             major_axis = max(h, v)
             minor_axis = min(h, v)
+            center = (x, y)
         else:
             major_axis, minor_axis, angle_rads = 0, 0, 0
-        return major_axis, minor_axis, angle_rads
+            center = (0, 0)
+        return major_axis, minor_axis, angle_rads, center
 
 
 if __name__ == '__main__':
@@ -50,19 +52,21 @@ if __name__ == '__main__':
 
     img = cv2.imread('../../data/frame0000.jpg')
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    (major_axis, minor_axis, angle_rads) = geometry.find_geometry(frame)
-    print major_axis, minor_axis, angle_rads
-
-    # cv2.ellipse(img, ellipse, (0, 0, 255), 2)
-    # cv2.imshow('ImageWindow_bin_2', img)
-    # cv2.waitKey()
+    (major_axis, minor_axis, angle_rads, center) = geometry.find_geometry(frame)
+    center = (int(round(center[0]*10)), int(round(center[1]*10)))
+    axis = (int(round(minor_axis*10/2)), int(round(major_axis*10/2)))
+    angle_deg = np.rad2deg(angle_rads)
+    frame = cv2.resize(frame, (320, 320))
+    cv2.ellipse(frame, center, axis, angle_deg, 0, 360, (255, 255, 255), 1)
+    cv2.imshow('ImageWindow_bin_2', frame)
+    cv2.waitKey()
 
     img = cv2.imread('../../data/frame0001.jpg')
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    (major_axis, minor_axis, angle_rads) = geometry.find_geometry(frame)
-    print major_axis, minor_axis, angle_rads
+    (major_axis, minor_axis, angle_rads, center) = geometry.find_geometry(frame)
+    print major_axis, minor_axis, angle_rads, center
 
     img = cv2.imread('../../data/frame0000.png')
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    (major_axis, minor_axis, angle_rads) = geometry.find_geometry(frame)
-    print major_axis, minor_axis, angle_rads
+    (major_axis, minor_axis, angle_rads, center) = geometry.find_geometry(frame)
+    print major_axis, minor_axis, angle_rads, center
