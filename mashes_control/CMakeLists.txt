@@ -16,16 +16,16 @@ add_message_files(
   MsgControl.msg
 )
 
-
 catkin_python_setup()
+
 generate_messages(
   DEPENDENCIES
   std_msgs
 )
+
 catkin_package(
   CATKIN_DEPENDS message_runtime
 )
-
 
 include_directories(
   ${catkin_INCLUDE_DIRS}

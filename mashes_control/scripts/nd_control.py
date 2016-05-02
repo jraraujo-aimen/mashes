@@ -49,6 +49,7 @@ class NdControl():
         self.mode = MANUAL
         self.power = power
         self.setpoint = setpoint
+        self.time = None
 
         self.control = Control()
         self.control.load_conf(os.path.join(path, 'config/control.yaml'))
@@ -72,15 +73,17 @@ class NdControl():
         rospy.loginfo('Set Point: ' + str(self.setpoint))
 
     def cb_geometry(self, msg_geo):
-        print 'Stamp:', msg_geo.header.stamp
         time = msg_geo.header.stamp.to_sec()
+        print 'Timestamp:', time
         if self.mode == MANUAL:
             self.msg_power.value = self.power
         elif self.mode == AUTOMATIC:
             minor_axis = msg_geo.minor_axis
             if minor_axis:
-                value = self.control.pid.update(minor_axis, time)
+                if (time - self.time) > 0.2:
+                    value = self.control.pid.update(minor_axis, time)
             else:
+                self.time = time
                 value = self.control.pid.power(self.power)
             print 'Power (minor_axis):', value
             self.msg_power.value = value

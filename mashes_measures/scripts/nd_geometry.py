@@ -13,6 +13,8 @@ class NdGeometry():
     def __init__(self):
         rospy.init_node('geometry')
 
+        scale = rospy.get_param('~scale', 0.375)
+
         image_topic = rospy.get_param('~image', '/tachyon/image')
         rospy.Subscriber(image_topic, Image, self.cb_image, queue_size=1)
         self.bridge = CvBridge()
@@ -23,7 +25,7 @@ class NdGeometry():
 
         threshold = rospy.get_param('~threshold', 127)
         self.geometry = Geometry(threshold)
-        self.calibration = Calibration(0.375)
+        self.calibration = Calibration(scale)
 
         rospy.spin()
 
