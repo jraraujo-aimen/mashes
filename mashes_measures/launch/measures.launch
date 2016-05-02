@@ -26,7 +26,7 @@
     <param name="image" type="str" value="/camera/image" />
   </node>
 
-  <node name="plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis" if="$(arg gui)" />
+  <node name="plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis /camera/geometry/orientation" if="$(arg gui)" />
 
   <!-- -->
   <!-- <node name="viewer" pkg="mashes_measures" type="viewer.py" /> -->
