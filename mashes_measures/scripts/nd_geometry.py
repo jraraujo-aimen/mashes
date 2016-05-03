@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import cv2
 import rospy
+import numpy as np
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from mashes_measures.msg import MsgGeometry
@@ -34,10 +35,12 @@ class NdGeometry():
             frame = self.bridge.imgmsg_to_cv2(msg_image)
             if msg_image.encoding == 'rgb8':
                 frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-            major_axis, minor_axis, angle = self.geometry.find_geometry(frame)
+            major_axis, minor_axis, angle, center = self.geometry.find_geometry(frame)
             self.msg_geo.header.stamp = stamp
             self.msg_geo.major_axis = self.calibration.correct(major_axis)
             self.msg_geo.minor_axis = self.calibration.correct(minor_axis)
+            self.msg_geo.x = center[0]
+            self.msg_geo.y = center[1]
             self.msg_geo.orientation = angle
             self.pub_geo.publish(self.msg_geo)
         except CvBridgeError, e:

@@ -27,7 +27,7 @@
     <param name="scale" type="double" value="0.00814" />
   </node>
 
-  <node name="plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis" if="$(arg gui)" /> -->
+  <node name="plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis /camera/geometry/orientation" if="$(arg gui)" />
 
   <!-- -->
   <!-- <node name="viewer" pkg="mashes_measures" type="viewer.py" /> -->
