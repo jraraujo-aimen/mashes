@@ -58,6 +58,7 @@ class PID():
         self.pwr_max = pwr_max
 
     def power(self, value):
+        self.time = None
         self.output = value
         return self.output
 
@@ -67,10 +68,16 @@ class PID():
         else:
             error = self.setpoint - value
             delta = time - self.time
-            output = self.output + self.Kp * (error - self.error) + self.Ki * error * delta
+            output = self.Kp * (error - self.error) + self.Ki * error * delta
+            if output > 50:
+                output = 50
+            if output < -50:
+                output = -50
+            output = self.output + output
+            print 'P', self.Kp * (error - self.error), 'I', self.Ki * error * delta
             self.error = error
             print 'SetPoint', self.setpoint, 'Value', value, 'Time', time
-            print 'Delta time', delta, 'Error', error
+            print 'Delta time', delta, 'Error', error, 'Output', output
             if output > self.pwr_max:
                 output = self.pwr_max
             if output < self.pwr_min:

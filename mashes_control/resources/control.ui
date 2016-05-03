@@ -126,7 +126,7 @@ color: rgb(255, 255, 255);</string>
            <double>10.000000000000000</double>
           </property>
           <property name="value">
-           <double>2.000000000000000</double>
+           <double>3.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -143,7 +143,7 @@ color: rgb(255, 255, 255);</string>
            <double>1000.000000000000000</double>
           </property>
           <property name="value">
-           <double>10.000000000000000</double>
+           <double>5.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -198,6 +198,19 @@ color: rgb(255, 255, 255);</string>
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="lblInfo">
+     <property name="text">
+      <string>Info</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -211,15 +224,9 @@ color: rgb(255, 255, 255);</string>
     </spacer>
    </item>
    <item>
-    <widget class="QLabel" name="lblInfo">
+    <widget class="QPushButton" name="btnCalibrate">
      <property name="text">
-      <string>Info</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::RichText</enum>
-     </property>
-     <property name="wordWrap">
-      <bool>true</bool>
+      <string>Calibrate Camera</string>
      </property>
     </widget>
    </item>

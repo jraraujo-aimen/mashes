@@ -2,15 +2,13 @@
 import os
 import rospy
 import rospkg
-import rosparam
 
 from python_qt_binding import loadUi
 from python_qt_binding import QtGui
 from python_qt_binding import QtCore
 
-import tf
 import rviz
-import numpy as np
+
 from std_msgs.msg import String
 from mashes_measures.msg import MsgVelocity
 from mashes_measures.msg import MsgStatus

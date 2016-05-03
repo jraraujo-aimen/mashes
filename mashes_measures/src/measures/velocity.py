@@ -19,38 +19,19 @@ class Velocity():
     def instantaneous_vector(self, time, position):
         if self.position is None:
             speed = 0
-            v = (0, 0, 0)
+            vel = np.array([0, 0, 0])
         else:
             # pos = np.array([position[0], position[1], position[2]])
             dt = time - self.time
-            dt_nsecs = dt.nsecs
             dp = position - self.position
-            speed = (np.sqrt(np.sum(dp * dp)) / dt_nsecs)*1000000000
-
-            v_x = (dp[0]/dt_nsecs)*1000000000
-            v_y = (dp[1]/dt_nsecs)*1000000000
-            v_z = (dp[2]/dt_nsecs)*1000000000
-
-            if v_x < 0.0005:
-                v_x = 0.0
-            v_x = np.around(v_x, decimals=4)
-
-            if v_y < 0.0005:
-                v_y = 0.0
-            v_y = np.around(v_y, decimals=4)
-
-            if v_z < 0.0005:
-                v_z = 0.0
-            v_z = np.around(v_z, decimals=4)
-
-            v = (v_x, v_y, v_z)
-
+            speed = np.sqrt(np.sum(dp * dp)) / dt
+            vel = np.around(dp / dt, decimals=4)
         if speed < 0.0005:
             speed = 0.0
         self.time = time
         # self.position = np.array([position[0], position[1], position[2]])
         self.position = position
-        v_vector3 = self.create_vector3_stamped(v, time)
+        v_vector3 = self.create_vector3_stamped(vel, time)
         return v_vector3, np.around(speed, decimals=4)
 
 

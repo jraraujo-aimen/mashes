@@ -10,6 +10,8 @@ from mashes_control.msg import MsgPower
 
 from mashes_measures.msg import MsgGeometry
 
+from mashes_tachyon.msg import MsgCalibrate
+
 from python_qt_binding import loadUi
 from python_qt_binding import QtGui
 from python_qt_binding import QtCore
@@ -27,16 +29,22 @@ class QtControl(QtGui.QWidget):
 
         self.btnMode.clicked.connect(self.btnModeClicked)
         self.btnControl.clicked.connect(self.btnControlClicked)
+        self.btnCalibrate.clicked.connect(self.btnCalibrateClicked)
 
         self.pub_mode = rospy.Publisher(
             '/control/mode', MsgMode, queue_size=10)
         self.pub_control = rospy.Publisher(
-            'control/parameters', MsgControl, queue_size=10)
+            '/control/parameters', MsgControl, queue_size=10)
+
+        self.pub_calibrate = rospy.Publisher(
+            '/tachyon/calibrate', MsgCalibrate, queue_size=10)
 
         self.mode = MANUAL
         self.msg_mode = MsgMode()
         self.msg_power = MsgPower()
         self.msg_control = MsgControl()
+
+        self.msg_calibrate = MsgCalibrate()
 
         self.btnControlClicked()
 
@@ -79,6 +87,10 @@ class QtControl(QtGui.QWidget):
         self.msg_control.ki = self.sbKi.value()
         self.msg_control.kd = self.sbKd.value()
         self.pub_control.publish(self.msg_control)
+
+    def btnCalibrateClicked(self):
+        self.msg_calibrate.calibrate = 1
+        self.pub_calibrate.publish(self.msg_calibrate)
 
     def cb_geometry(self, msg_geometry):
         self.minor_axis = msg_geometry.minor_axis
