@@ -10,16 +10,15 @@
     <param name="scale" type="double" value="0.375" />
   </node>
 
-  <node name="moments" pkg="mashes_measures" type="nd_moments.py">
+  <!-- <node name="moments" pkg="mashes_measures" type="nd_moments.py">
     <param name="image" type="str" value="/tachyon/image" />
-  </node>
+  </node> -->
 
-  <node name="plot_nit" pkg="rqt_plot" type="rqt_plot" args="/tachyon/geometry/major_axis /tachyon/geometry/minor_axis
-                                                             /tachyon/momemnts/major_axis /tachyon/moments/minor_axis" if="$(arg gui)" />
+  <node name="plot_nit" pkg="rqt_plot" type="rqt_plot" args="/tachyon/geometry/major_axis /tachyon/geometry/minor_axis" if="$(arg gui)" />
 
   <!-- -->
 
-  <node name="viewer_nir" pkg="image_view" type="image_view" if="$(arg gui)">
+  <!-- <node name="viewer_nir" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/camera/image" />
   </node>
 
@@ -28,7 +27,7 @@
     <param name="scale" type="double" value="0.00814" />
   </node>
 
-  <node name="plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis" if="$(arg gui)" />
+  <node name="plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis" if="$(arg gui)" /> -->
 
   <!-- -->
   <!-- <node name="viewer" pkg="mashes_measures" type="viewer.py" /> -->

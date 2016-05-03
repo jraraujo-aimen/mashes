@@ -37,8 +37,8 @@ class NdControl():
         power_max = rospy.get_param('~power_max', 1500.0)
 
         power = rospy.get_param('~power', 1000)
-        setpoint = rospy.get_param('~setpoint', 2.2)
-        Kp = rospy.get_param('~Kp', 10.0)
+        setpoint = rospy.get_param('~setpoint', 3.0)
+        Kp = rospy.get_param('~Kp', 5.0)
         Ki = rospy.get_param('~Ki', 100.0)
         Kd = rospy.get_param('~Kd', 0.0)
         print 'Kp:', Kp, 'Ki:', Ki, 'Kd', Kd
@@ -49,7 +49,6 @@ class NdControl():
         self.mode = MANUAL
         self.power = power
         self.setpoint = setpoint
-        self.time = None
 
         self.control = Control()
         self.control.load_conf(os.path.join(path, 'config/control.yaml'))
@@ -70,22 +69,19 @@ class NdControl():
         Kd = msg_control.kd
         self.control.pid.set_setpoint(self.setpoint)
         self.control.pid.set_parameters(Kp, Ki, Kd)
-        rospy.loginfo('Set Point: ' + str(self.setpoint))
+        rospy.loginfo('Params: ' + str(msg_control))
 
     def cb_geometry(self, msg_geo):
         time = msg_geo.header.stamp.to_sec()
-        print 'Timestamp:', time
         if self.mode == MANUAL:
-            self.msg_power.value = self.power
+            value = self.control.pid.power(self.power)
+            self.msg_power.value = value
         elif self.mode == AUTOMATIC:
             minor_axis = msg_geo.minor_axis
-            if minor_axis:
-                if (time - self.time) > 0.2:
-                    value = self.control.pid.update(minor_axis, time)
+            if minor_axis > 0.5:
+                value = self.control.pid.update(minor_axis, time)
             else:
-                self.time = time
                 value = self.control.pid.power(self.power)
-            print 'Power (minor_axis):', value
             self.msg_power.value = value
         else:
             major_axis = msg_geo.major_axis
@@ -93,7 +89,8 @@ class NdControl():
                 value = self.control.pid.update(major_axis, time)
             else:
                 value = self.control.pid.power(self.power)
-            print 'Power (major axis):', value
+            self.msg_power.value = value
+        print '# Timestamp', time, '# Power', self.msg_power.value
         self.pub_power.publish(self.msg_power)
 
 
