@@ -14,6 +14,8 @@ class Utils(object):
         self.point_2 = 0
         self.point_3 = 0
 
+        self.STEPS = 1
+
     def mouse_handler(self, event, x, y, flags, data):
         if event == cv2.EVENT_LBUTTONDOWN:
             if len(data['points']) < 4:
@@ -100,7 +102,7 @@ class Utils(object):
             if len(coord_points) < 4:
                 coord_points.append([x, y])
         coord_points = np.vstack(coord_points).astype(float)
-        return coord_points
+        return  np.float32(coord_points)
 
 
     def get_two_points(self, im):
@@ -127,7 +129,7 @@ class Utils(object):
             '''
         pts_ptr = self.get_four_points(image)
         pts.append(pts_ptr)
-        for i in range(0, 1):
+        for i in range(self.STEPS - 1):
             print '''
                 Repit selection one more time -- and then hit ENTER
                 '''
@@ -145,7 +147,7 @@ class Utils(object):
             '''
         pts_ptr = self.get_two_points(image)
         pts.append(pts_ptr)
-        for i in range(0, 1):
+        for i in range(self.STEPS - 1):
             print '''
                 Repit selection one more time -- and then hit ENTER
                 '''
