@@ -25,8 +25,8 @@
     <arg name="gui" value="$(arg gui)" />
   </include>
 
-  <include file="$(find etna_scanning)/launch/ueye_profile.launch">
-    <arg name="gui" value="true" />
+  <include file="$(find etna_scanning)/launch/profile.launch">
+    <arg name="gui" value="$(arg gui)" />
     <arg name="sim" value="$(arg sim)" />
-  </include> -->
+  </include>
 </launch>
