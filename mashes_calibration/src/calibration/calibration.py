@@ -6,16 +6,21 @@ from utils import Utils
 from homography import Homography
 from tcp_to_cam import TCP_to_cam
 
+
 if __name__ == '__main__':
 
     process = Utils()
     scale = 8
-    pts_pattern = [[0, 0], [6, 0], [0, 6], [6, 6]]
-    image_original = cv2.imread('pics/nit_sqr.jpg')
-    h = Homography(pts_pattern, image_original, scale)
-    cam_H_cal, s = h.calculate_homography()
-    print cam_H_cal
-#--------------------------------------------------------------------#
+    image_original = cv2.imread('../../data/nit_sqr.jpg')
+    h = Homography()
+    points = h.read_image(image_original, scale)
+    hom = h.calculate(points)
+    s = h.scale(hom)
+    cam_H_cal = hom
+
+    print '# Camera Calibration'
+    print 'Homography:', cam_H_cal
+
     image_rotate_1 = cv2.imread('pics/pose1.jpg')
     image_rotate_2 = cv2.imread('pics/pose2.jpg')
     image_rotate_3 = cv2.imread('pics/pose3.jpg')
