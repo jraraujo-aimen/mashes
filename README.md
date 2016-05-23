@@ -47,10 +47,13 @@ This meta-package contains four packages:
 To play a bag file with the simultaneous recorded data:
 
 ```
-roslaunch mashes_workcell mashes_bagplay.launch filename:=data.bag
+rosrun rosbag play data.bag --clock
+roslaunch mashes_robviz robviz.launch sim:=true
 ```
 
 where data.bag is the absolute file path.
+
+Some datasets are available on [MAShES ZENODO](https://zenodo.org/record/45664?ln=en#.V0Med57WT6I).
 
 ## Acknowledgement
 
