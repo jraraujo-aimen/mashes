@@ -1,22 +1,21 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(mashes_measures)
+project(mashes_control)
 
 find_package(catkin REQUIRED COMPONENTS
-  tf
   rospy
   roscpp
   std_msgs
-  cv_bridge
   sensor_msgs
-  image_transport
   message_generation
 )
 
-# Declare the message files to be built
- add_message_files(FILES
-                   MsgGeometry.msg
-                   MsgVelocity.msg
-                   MsgStatus.msg)
+add_message_files(
+  FILES
+  MsgMode.msg
+  MsgPower.msg
+  MsgControl.msg
+)
+
 catkin_python_setup()
 
 generate_messages(

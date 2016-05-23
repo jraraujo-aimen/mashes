@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>mashes_workcell</name>
-  <version>0.2.0</version>
-  <description>The mashes_workcell package</description>
+  <name>mashes_robviz</name>
+  <version>0.1.0</version>
+  <description>The mashes_robviz package</description>
   <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
   <license>BSD</license>
 
