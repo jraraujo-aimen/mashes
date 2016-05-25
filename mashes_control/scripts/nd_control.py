@@ -72,24 +72,24 @@ class NdControl():
         rospy.loginfo('Params: ' + str(msg_control))
 
     def cb_geometry(self, msg_geo):
-        time = msg_geo.header.stamp.to_sec()
+        stamp = msg_geo.header.stamp
+        time = stamp.to_sec()
         if self.mode == MANUAL:
             value = self.control.pid.power(self.power)
-            self.msg_power.value = value
         elif self.mode == AUTOMATIC:
             minor_axis = msg_geo.minor_axis
             if minor_axis > 0.5:
                 value = self.control.pid.update(minor_axis, time)
             else:
                 value = self.control.pid.power(self.power)
-            self.msg_power.value = value
         else:
             major_axis = msg_geo.major_axis
             if major_axis:
                 value = self.control.pid.update(major_axis, time)
             else:
                 value = self.control.pid.power(self.power)
-            self.msg_power.value = value
+        self.msg_power.header.stamp = stamp
+        self.msg_power.value = value
         print '# Timestamp', time, '# Power', self.msg_power.value
         self.pub_power.publish(self.msg_power)
 
