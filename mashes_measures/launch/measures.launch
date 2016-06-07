@@ -32,7 +32,7 @@
   <!-- -->
   <!-- <node name="viewer" pkg="mashes_measures" type="viewer.py" /> -->
 
-  <node name="velocity" pkg="mashes_measures" type="nd_velocity.py" />
+  <node name="velocity" pkg="mashes_measures" type="nd_velocity.py" respawn="true" />
 
-  <node name="supervisor" pkg="mashes_measures" type="nd_supervisor.py" />
+  <node name="supervisor" pkg="mashes_measures" type="nd_supervisor.py" respawn="true" />
 </launch>
