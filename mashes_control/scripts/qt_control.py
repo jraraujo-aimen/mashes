@@ -53,9 +53,9 @@ class QtControl(QtGui.QWidget):
         self.power = 0
 
         rospy.Subscriber(
-            '/tachyon/geometry', MsgGeometry, self.cb_geometry, queue_size=1)
+            '/tachyon/geometry', MsgGeometry, self.cbGeometry, queue_size=1)
         rospy.Subscriber(
-            '/control/power', MsgPower, self.cb_power, queue_size=1)
+            '/control/power', MsgPower, self.cbPower, queue_size=1)
 
         self.btnModeClicked()
         self.btnControlClicked()
@@ -92,11 +92,11 @@ class QtControl(QtGui.QWidget):
         self.msg_calibrate.calibrate = 1
         self.pub_calibrate.publish(self.msg_calibrate)
 
-    def cb_geometry(self, msg_geometry):
+    def cbGeometry(self, msg_geometry):
         self.minor_axis = msg_geometry.minor_axis
         self.major_axis = msg_geometry.major_axis
 
-    def cb_power(self, msg_power):
+    def cbPower(self, msg_power):
         self.power = msg_power.value
 
     def tmrInfoEvent(self):
