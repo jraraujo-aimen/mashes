@@ -72,7 +72,7 @@ class NdControl():
     def cb_step(self, msg_step):
         self.secs = msg_step.trigger
         self.power_step = msg_step.power
-        rospy.loginfo('Step params: ' + str(msg_control))
+        rospy.loginfo('Step params: ' + str(msg_step))
 
     def cb_control(self, msg_control):
         self.setpoint = msg_control.setpoint
