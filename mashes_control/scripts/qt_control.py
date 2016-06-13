@@ -21,12 +21,12 @@ from python_qt_binding import QtCore
 MANUAL = 0
 AUTOMATIC = 1
 STEP = 2
-path = rospkg.RosPack().get_path('mashes_control')
 
 
 class QtControl(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
+        path = rospkg.RosPack().get_path('mashes_control')
         loadUi(os.path.join(path, 'resources', 'control.ui'), self)
 
         self.btnMode.activated.connect(self.btnModeClicked)
@@ -58,9 +58,9 @@ class QtControl(QtGui.QWidget):
         self.power = 0
 
         rospy.Subscriber(
-            '/tachyon/geometry', MsgGeometry, self.cb_geometry, queue_size=1)
+            '/tachyon/geometry', MsgGeometry, self.cbGeometry, queue_size=1)
         rospy.Subscriber(
-            '/control/power', MsgPower, self.cb_power, queue_size=1)
+            '/control/power', MsgPower, self.cbPower, queue_size=1)
 
         self.btnModeClicked()
         self.btnControlClicked()
@@ -85,7 +85,7 @@ class QtControl(QtGui.QWidget):
         elif self.btnMode.currentText() == "Step":
             self.lblStatus.setText("Step")
             self.lblStatus.setStyleSheet(
-                "background-color: rgb(0, 255, 0); color: rgb(255, 255, 255);")
+                "background-color: rgb(0, 255, 255); color: rgb(0, 0, 0);")
             self.mode = STEP
             self.tbParams.setCurrentIndex(2)
 
@@ -103,16 +103,15 @@ class QtControl(QtGui.QWidget):
         self.pub_control.publish(self.msg_control)
         self.pub_step.publish(self.msg_step)
 
-
     def btnCalibrateClicked(self):
         self.msg_calibrate.calibrate = 1
         self.pub_calibrate.publish(self.msg_calibrate)
 
-    def cb_geometry(self, msg_geometry):
+    def cbGeometry(self, msg_geometry):
         self.minor_axis = msg_geometry.minor_axis
         self.major_axis = msg_geometry.major_axis
 
-    def cb_power(self, msg_power):
+    def cbPower(self, msg_power):
         self.power = msg_power.value
 
     def tmrInfoEvent(self):

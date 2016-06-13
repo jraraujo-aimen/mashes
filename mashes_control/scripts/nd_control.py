@@ -8,22 +8,22 @@ from mashes_control.msg import MsgMode
 from mashes_control.msg import MsgStep
 from mashes_control.msg import MsgControl
 from mashes_control.msg import MsgPower
-from mashes_labjack.msg import MsgLabJack
 from mashes_measures.msg import MsgGeometry
+from cladplus_labjack.msg import MsgLabJack
 
 from control.control import Control
 from control.control import PID
 
 
 MANUAL = 0
-STEP = 2
 AUTOMATIC = 1
-path = rospkg.RosPack().get_path('mashes_control')
+STEP = 2
 
 
 class NdControl():
     def __init__(self):
         rospy.init_node('control')
+        path = rospkg.RosPack().get_path('mashes_control')
 
         rospy.Subscriber(
             '/tachyon/geometry', MsgGeometry, self.cb_geometry, queue_size=1)
@@ -40,19 +40,15 @@ class NdControl():
         power_min = rospy.get_param('~power_min', 0.0)
         power_max = rospy.get_param('~power_max', 1500.0)
 
-        power = rospy.get_param('~power', 1000)
-        setpoint = rospy.get_param('~setpoint', 3.0)
-        Kp = rospy.get_param('~Kp', 5.0)
-        Ki = rospy.get_param('~Ki', 100.0)
-        Kd = rospy.get_param('~Kd', 0.0)
-        print 'Kp:', Kp, 'Ki:', Ki, 'Kd', Kd
+        params = self.get_params()
+        print params
 
         self.msg_power = MsgPower()
         self.msg_labjack = MsgLabJack()
 
         self.mode = MANUAL
-        self.power = power
-        self.setpoint = setpoint
+        self.power = params['power']
+        self.setpoint = params['setpoint']
         self.secs = 5
         self.first_step = True
 
@@ -62,6 +58,14 @@ class NdControl():
         self.control.pid.set_setpoint(self.setpoint)
 
         rospy.spin()
+
+    def get_params(self):
+        params = {'power': rospy.get_param('~power', 1000),
+                  'setpoint': rospy.get_param('~setpoint', 3.0),
+                  'Kp': rospy.get_param('~Kp', 5.0),
+                  'Ki': rospy.get_param('~Ki', 100.0),
+                  'Kd': rospy.get_param('~Kd', 0.0)}
+        return params
 
     def cb_mode(self, msg_mode):
         self.mode = msg_mode.value
@@ -85,7 +89,6 @@ class NdControl():
         rospy.loginfo('Params: ' + str(msg_control))
 
     def cb_geometry(self, msg_geo):
-        print 'geometry'
         stamp = msg_geo.header.stamp
         time = stamp.to_sec()
         if self.mode == MANUAL:
@@ -98,7 +101,7 @@ class NdControl():
                 value = self.control.pid.power(self.power)
         elif self.mode == STEP:
             if self.first_step:
-                self.time_step = stamp.to_sec()
+                self.time_step = time
                 self.first_step = False
             if time - self.time_step > self.secs:
                 value = self.power_step

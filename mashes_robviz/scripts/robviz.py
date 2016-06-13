@@ -13,7 +13,6 @@ from std_msgs.msg import String
 from mashes_measures.msg import MsgVelocity
 from mashes_measures.msg import MsgStatus
 
-from qt_param import QtParam
 from qt_control import QtControl
 
 
@@ -101,15 +100,11 @@ class Robviz(QtGui.QMainWindow):
 
         self.boxPlot.addWidget(MyViz())
 
-        self.qtParam = QtParam()
         self.qtControl = QtControl()
 
-        self.tabWidget.addTab(self.qtParam, 'Parameters')
         self.tabWidget.addTab(self.qtControl, 'Control')
 
         self.tabWidget.setCurrentWidget(self.qtControl)
-
-        #self.qtData.accepted.connect(self.qtPartAccepted)
 
         self.btnQuit.clicked.connect(self.btnQuitClicked)
 
