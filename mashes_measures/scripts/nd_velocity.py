@@ -49,6 +49,7 @@ class NdVelocity():
                 tf.ExtrapolationException):
             rospy.loginfo("TF Exception")
 
+
 if __name__ == '__main__':
     try:
         NdVelocity()

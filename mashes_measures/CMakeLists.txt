@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
 # Declare the message files to be built
  add_message_files(FILES
                    MsgGeometry.msg
-                   MsgGeometryViewer.msg
                    MsgVelocity.msg
                    MsgStatus.msg)
 catkin_python_setup()

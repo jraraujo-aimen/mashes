@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 import os
 import cv2
-import math
 import rospy
 import rospkg
 import numpy as np
+
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from mashes_measures.msg import MsgGeometry
-from mashes_measures.msg import MsgGeometryViewer
+
 from measures.geometry import Geometry
 from measures.projection import Projection
 
@@ -31,10 +31,11 @@ class NdGeometry():
         self.pub_geo = rospy.Publisher(geo_topic, MsgGeometry, queue_size=10)
         self.msg_geo = MsgGeometry()
 
+        # TODO: Remove redundant code
         geo_view_topic = '/%s/geometry_viewer' % image_topic.split('/')[1]
         self.pub_geo_view = rospy.Publisher(
-            geo_view_topic, MsgGeometryViewer, queue_size=10)
-        self.msg_geo_view = MsgGeometryViewer()
+            geo_view_topic, MsgGeometry, queue_size=10)
+        self.msg_geo_view = MsgGeometry()
 
         threshold = rospy.get_param('~threshold', 127)
         self.geometry = Geometry(threshold)
@@ -79,11 +80,8 @@ class NdGeometry():
         except CvBridgeError, e:
             print e
 
-
-
     def get_distance(self, pnt_1, pnt_2):
-        d = math.sqrt((pnt_2[0]-pnt_1[0])**2 + (pnt_2[1]-pnt_1[1])**2)
-
+        d = np.sqrt((pnt_2[0]-pnt_1[0])**2 + (pnt_2[1]-pnt_1[1])**2)
         return d
 
     def get_points(self, major, minor, center):
@@ -98,14 +96,15 @@ class NdGeometry():
 
     def get_pixels(self, mj, mn, a, c):
         #major
-        major_0 = [c[0] + mj*math.cos(a), c[1] - mj*math.sin(a)]
-        major_1 = [c[0] - mj*math.cos(a), c[1] + mj*math.sin(a)]
+        major_0 = [c[0] + mj*np.cos(a), c[1] - mj*np.sin(a)]
+        major_1 = [c[0] - mj*np.cos(a), c[1] + mj*np.sin(a)]
 
         #minor
-        minor_0 = [c[0] - mn*math.cos((math.pi)/2 - a), c[1] - mn*math.sin((math.pi)/2 - a)]
-        minor_1 = [c[0] + mn*math.cos((math.pi)/2 - a), c[1] + mn*math.sin((math.pi)/2 - a)]
+        minor_0 = [c[0] - mn*np.cos((np.pi)/2-a), c[1] - mn*np.sin((np.pi)/2-a)]
+        minor_1 = [c[0] + mn*np.cos((np.pi)/2-a), c[1] + mn*np.sin((np.pi)/2-a)]
 
         return major_0, major_1, minor_0, minor_1
+
 
 if __name__ == '__main__':
     try:
