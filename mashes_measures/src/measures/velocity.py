@@ -17,6 +17,7 @@ class Velocity():
             vel = np.around(dp / dt, decimals=4)
         if speed < 0.0005:
             speed = 0.0
+
         self.time = time
         self.position = position
         return np.around(speed, decimals=4), np.around(vel, decimals=4)

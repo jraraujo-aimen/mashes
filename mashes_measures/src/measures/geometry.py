@@ -35,12 +35,16 @@ class Geometry():
         img_bin = self.binarize(frame)
         cnt = self.find_contour(img_bin)
         if cnt is not None:
-            ellipse = self.find_ellipse(cnt)
-            (x, y), (h, v), angle = ellipse
-            angle_rads = np.deg2rad(angle)
-            major_axis = max(h, v)
-            minor_axis = min(h, v)
-            center = (x, y)
+            if len(cnt) > 4:
+                ellipse = self.find_ellipse(cnt)
+                (x, y), (h, v), angle = ellipse
+                angle_rads = np.deg2rad(angle)
+                major_axis = max(h, v)
+                minor_axis = min(h, v)
+                center = (x, y)
+            else:
+                major_axis, minor_axis, angle_rads = 0, 0, 0
+                center = (0, 0)
         else:
             major_axis, minor_axis, angle_rads = 0, 0, 0
             center = (0, 0)
