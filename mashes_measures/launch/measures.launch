@@ -29,11 +29,6 @@
 
   <node name="plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis /camera/geometry/orientation" if="$(arg gui)" />
 
-  <!-- -->
-  <node name="viewer_cameras" pkg="mashes_measures" type="nd_viewer_cameras.py"/>
-
-  <node name="coolrate" pkg="mashes_measures" type="nd_coolrate.py" />
-
   <node name="velocity" pkg="mashes_measures" type="nd_velocity.py" respawn="true"/>
 
   <node name="supervisor" pkg="mashes_measures" type="nd_supervisor.py" respawn="true" />

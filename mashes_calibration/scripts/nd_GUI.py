@@ -5,8 +5,6 @@ import sys
 import cv2
 import rospy
 import rospkg
-
-
 import numpy as np
 
 from PyQt4 import QtCore, QtGui, uic

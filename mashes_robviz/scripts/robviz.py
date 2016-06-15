@@ -9,12 +9,10 @@ from python_qt_binding import QtCore
 
 import rviz
 
-from std_msgs.msg import String
 from mashes_measures.msg import MsgVelocity
 from mashes_measures.msg import MsgStatus
 
-from qt_param import QtParam
-from qt_control import QtControl
+from qt_measures import QtMeasures
 
 
 path = rospkg.RosPack().get_path('mashes_robviz')
@@ -24,14 +22,10 @@ class MyViz(QtGui.QWidget):
     def __init__(self, parent=None):
         QtGui.QWidget.__init__(self, parent)
 
-        ## rviz.VisualizationFrame is the main container widget of the
-        ## regular RViz application. In this example, we disable everything
-        ## so that the only thing visible is the 3D render window.
         self.frame = rviz.VisualizationFrame()
         self.frame.setSplashPath("")
         self.frame.initialize()
 
-        # Read the configuration from the config file for visualization.
         reader = rviz.YamlConfigReader()
         config = rviz.Config()
 
@@ -71,8 +65,6 @@ class MyViz(QtGui.QWidget):
 
         layout.addWidget(self.frame)
 
-    ## switchToView() works by looping over the views saved in the
-    ## ViewManager and looking for one with a matching name.
     def switchToView(self, view_name):
         view_man = self.manager.getViewManager()
         for i in range(view_man.getNumViews()):
@@ -101,15 +93,9 @@ class Robviz(QtGui.QMainWindow):
 
         self.boxPlot.addWidget(MyViz())
 
-        self.qtParam = QtParam()
-        self.qtControl = QtControl()
-
-        self.tabWidget.addTab(self.qtParam, 'Parameters')
-        self.tabWidget.addTab(self.qtControl, 'Control')
-
-        self.tabWidget.setCurrentWidget(self.qtControl)
-
-        #self.qtData.accepted.connect(self.qtPartAccepted)
+        self.qtMeasures = QtMeasures()
+        self.tabWidget.addTab(self.qtMeasures, 'Measures')
+        self.tabWidget.setCurrentWidget(self.qtMeasures)
 
         self.btnQuit.clicked.connect(self.btnQuitClicked)
 

@@ -36,11 +36,11 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>LMD</string>
+   <string>LMD Multimodal</string>
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>proper.png</normaloff>proper.png</iconset>
+    <normaloff>m.png</normaloff>m.png</iconset>
   </property>
   <property name="autoFillBackground">
    <bool>false</bool>
