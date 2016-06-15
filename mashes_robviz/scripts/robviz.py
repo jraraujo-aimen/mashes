@@ -9,11 +9,10 @@ from python_qt_binding import QtCore
 
 import rviz
 
-from std_msgs.msg import String
 from mashes_measures.msg import MsgVelocity
 from mashes_measures.msg import MsgStatus
 
-from qt_control import QtControl
+# from qt_control import QtControl
 
 
 path = rospkg.RosPack().get_path('mashes_robviz')
@@ -100,11 +99,9 @@ class Robviz(QtGui.QMainWindow):
 
         self.boxPlot.addWidget(MyViz())
 
-        self.qtControl = QtControl()
-
-        self.tabWidget.addTab(self.qtControl, 'Control')
-
-        self.tabWidget.setCurrentWidget(self.qtControl)
+        # self.qtControl = QtControl()
+        # self.tabWidget.addTab(self.qtControl, 'Control')
+        # self.tabWidget.setCurrentWidget(self.qtControl)
 
         self.btnQuit.clicked.connect(self.btnQuitClicked)
 

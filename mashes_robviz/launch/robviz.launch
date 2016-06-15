@@ -6,8 +6,8 @@
       <arg name="sim" value="$(arg sim)" />
     </include>
 
-    <include file="$(find mashes_control)/launch/control.launch">
-      <arg name="gui" value="false" />
+    <include file="$(find cladplus_data)/launch/cladviz.launch">
+      <arg name="sim" value="true" />
     </include>
 
     <node name="robviz" pkg="mashes_robviz" type="robviz.py"/>

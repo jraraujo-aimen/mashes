@@ -1,14 +1,9 @@
-import os
-import rospkg
-
 from urdf_parser_py.urdf import URDF
 from pykdl_utils.kdl_parser import kdl_tree_from_urdf_model
 from pykdl_utils.kdl_kinematics import KDLKinematics
 
-path = rospkg.RosPack().get_path('mashes_workcell')
-
 #robot = URDF.from_parameter_server()
-robot = URDF.from_xml_file(os.path.join(path, 'urdf', 'workcell.urdf'))
+robot = URDF.from_xml_file('../../../mashes_workcell/urdf/workcell.urdf')
 
 tree = kdl_tree_from_urdf_model(robot)
 print tree.getNrOfSegments()
