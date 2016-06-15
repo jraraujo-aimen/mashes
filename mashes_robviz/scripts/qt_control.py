@@ -1,1 +1,0 @@
-../../mashes_control/scripts/qt_control.py
