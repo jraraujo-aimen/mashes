@@ -37,7 +37,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Record Cloud</string>
+      <string>Record Measures</string>
      </property>
      <property name="checkable">
       <bool>true</bool>

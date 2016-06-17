@@ -1,37 +1,43 @@
 <launch>
   <arg name="gui" default="true" />
 
-  <node name="viewer_nit" pkg="image_view" type="image_view" if="$(arg gui)">
+  <node name="viewer_tachyon" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/tachyon/image" />
   </node>
-
-  <node name="geometry" pkg="mashes_measures" type="nd_geometry.py">
-    <param name="image" type="str" value="/tachyon/image" />
-    <param name="scale" type="double" value="0.375" />
+  <node name="viewer_camera" pkg="image_view" type="image_view" if="$(arg gui)">
+    <remap from="image" to="/camera/image" />
   </node>
 
-  <node name="moments" pkg="mashes_measures" type="nd_moments.py">
+  <node name="geometry_tachyon" pkg="mashes_measures" type="nd_geometry.py">
     <param name="image" type="str" value="/tachyon/image" />
+    <param name="config" type="str" value="$(find mashes_measures)/config/tachyon.yaml" />
+  </node>
+  <node name="geometry_camera" pkg="mashes_measures" type="nd_geometry.py">
+    <param name="image" type="str" value="/camera/image" />
+    <param name="config" type="str" value="$(find mashes_measures)/config/camera.yaml" />
   </node>
 
-  <node name="plot_nit" pkg="rqt_plot" type="rqt_plot" args="/tachyon/geometry/major_axis /tachyon/geometry/minor_axis" />
+  <node name="moments_tachyon" pkg="mashes_measures" type="nd_moments.py">
+    <param name="image" type="str" value="/tachyon/image" />
+    <param name="config" type="str" value="$(find mashes_measures)/config/tachyon.yaml" />
+  </node>
+  <node name="moments_camera" pkg="mashes_measures" type="nd_moments.py">
+    <param name="image" type="str" value="/camera/image" />
+    <param name="config" type="str" value="$(find mashes_measures)/config/camera.yaml" />
+  </node>
 
-  <node name="coolrate" pkg="mashes_measures" type="nd_coolrate.py" />
-
-  <node name="registration" pkg="mashes_measures" type="nd_viewer_cameras.py" />
+  <!-- <node name="coolrate" pkg="mashes_measures" type="nd_coolrate.py" /> -->
 
   <node name="viewer_cameras" pkg="image_view" type="image_view">
     <remap from="image" to="/measures/image" />
   </node>
 
-  <node name="geometry_nir" pkg="mashes_measures" type="nd_geometry.py">
-    <param name="image" type="str" value="/camera/image" />
-    <param name="scale" type="double" value="0.00814" />
-  </node>
-
+  <node name="plot_nit" pkg="rqt_plot" type="rqt_plot" args="/tachyon/geometry/major_axis /tachyon/geometry/minor_axis" if="$(arg gui)" />
   <node name="plot_nir" pkg="rqt_plot" type="rqt_plot" args="/camera/geometry/major_axis /camera/geometry/minor_axis /camera/geometry/orientation" if="$(arg gui)" />
 
   <node name="velocity" pkg="mashes_measures" type="nd_velocity.py" respawn="true"/>
+
+  <node name="registration" pkg="mashes_measures" type="nd_registration.py" respawn="true"/>
 
   <node name="supervisor" pkg="mashes_measures" type="nd_supervisor.py" respawn="true" />
 </launch>
