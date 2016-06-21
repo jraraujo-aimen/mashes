@@ -13,6 +13,8 @@ from mashes_measures.msg import MsgVelocity
 
 from measures.projection import Projection
 
+from tachyon.tachyon import LUT_IRON
+
 
 class NdRegistration():
     def __init__(self):
@@ -101,6 +103,8 @@ class NdRegistration():
                 img_camera, self.camera_ellipse)
             image = cv2.addWeighted(image, 1, img_camera, 0.4, 0)
         if self.frame_tachyon is not None:
+            if len(self.frame_tachyon.shape) == 2:
+                self.frame_tachyon = LUT_IRON[self.frame_tachyon]
             img_tachyon = cv2.cvtColor(self.frame_tachyon, cv2.COLOR_RGB2BGR)
             img_tachyon = self.p_tachyon.project_image(img_tachyon)
             img_tachyon = self.p_tachyon.draw_TCP_axis(img_tachyon)
