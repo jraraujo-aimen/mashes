@@ -18,7 +18,7 @@ class NdVelocity():
         self.msg_velocity = MsgVelocity()
         self.listener = tf.TransformListener()
 
-        r = rospy.Rate(10)  # 10hz
+        r = rospy.Rate(25)  # 10hz
         while not rospy.is_shutdown():
             try:
                 self.pub_velocity()
