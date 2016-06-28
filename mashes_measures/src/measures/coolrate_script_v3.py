@@ -54,8 +54,8 @@ class CoolRate_adv():
     def load_image(self, dir_frame):
         frame = cv2.imread(dir_frame, 1)
         # if frame.encoding == 'rgb8':
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # print frame.shape
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        print frame.shape
         self.image = frame
         # if data.encoding == 'mono8':
         #     self.frame = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
@@ -82,34 +82,55 @@ class CoolRate_adv():
                 self.velocity.load_velocity(row)
 
                 frame_0 = self.frame_0.copy()
-                image_resized_1 = cv2.resize(frame_0, (500, 500), interpolation=cv2.INTER_LINEAR)
-                cv2.imshow("Pre", image_resized_1)
-
-                image_gradient = self.image_gradient()
-                image_resized_2 = cv2.resize(image_gradient, (500, 500), interpolation=cv2.INTER_LINEAR)
+                # image_resized_1 = cv2.resize(frame_0, (500, 500), interpolation=cv2.INTER_LINEAR)
+                # cv2.imshow("Pre", image_resized_1)
+                x = y = np.arange(0, 32, 1)
+                X, Y = np.meshgrid(x, y)
+                gradient = self.image_gradient()
+                # image_resized_2 = cv2.resize(gradient, (500, 500), interpolation=cv2.INTER_LINEAR)
                 # plt.hist(image_resized_2.ravel(), 265, [0, 265])
                 # plt.show()
 
-                cv2.imshow("image_gradient", image_resized_2)
+                # cv2.imshow("image_gradient", image_resized_2)
+
+                levels = np.linspace(-2000, 2000, num=15)
+                origin = 'lower'
+                # origin = 'upper'
+                # CS = plt.contourf(X, Y, gradient, 10, cmap=plt.cm.bone, origin = origin)
+                # CS2 = plt.contour(CS, levels=CS.levels[::4], colors='r', origin = origin, hold='on')
+                CS = plt.contourf(X, Y, gradient, levels, cmap=plt.cm.jet, origin = origin)
+                CS2 = plt.contour(CS, levels, colors='r', origin = origin, hold='on')
+
+                plt.title('Melt pool regions')
+                plt.xlabel('Image width')
+                plt.ylabel('Image height')
+                cbar = plt.colorbar(CS)
+                cbar.ax.set_ylabel('pixel intensity')
+                cbar.add_lines(CS2)
+
 
                 frame_1 = self.frame_1.copy()
-                image_resized_3 = cv2.resize(frame_1, (500, 500), interpolation=cv2.INTER_LINEAR)
-                cv2.imshow("Post", image_resized_3)
+                # image_resized_3 = cv2.resize(frame_1, (500, 500), interpolation=cv2.INTER_LINEAR)
+                # cv2.imshow("Post", image_resized_3)
+                #
+                # dir_folder = os.path.abspath(os.path.join(os.getcwd(), "../../data/coolrate/result"))
+                # if not os.path.exists(dir_folder):
+                #     os.makedirs(dir_folder)
+                # name_file = os.path.join(dir_folder, os.path.basename(d_f))
 
-                dir_folder = os.path.abspath(os.path.join(os.getcwd(), "../../data/coolrate/result"))
-                if not os.path.exists(dir_folder):
-                    os.makedirs(dir_folder)
-                name_file = os.path.join(dir_folder, os.path.basename(d_f))
+                # cv2.imwrite(name_file, image_gradient)
+                # cv2.waitKey(1)
 
-                cv2.imwrite(name_file, image_gradient)
-                cv2.waitKey(1)
+                plt.draw()
+                plt.pause(1)
+                plt.clf()
 
         print self.max_value, self.min_value
         max_v = np.array(self.max_value)
         min_v = np.array(self.min_value)
         print "Max, Min frame:", max_v.argmax(), min_v.argmin()
-        print "Max:", np.amax(self.max_value), np.amax(self.min_value)
-        print "Min:", np.amin(self.max_value), np.amin(self.min_value)
+        print "Max:", np.nanmax(self.max_value), np.nanmax(self.min_value)
+        print "Min:", np.nanmin(self.max_value), np.nanmin(self.min_value)
 
     def image_gradient(self):
         #ns
@@ -125,26 +146,24 @@ class CoolRate_adv():
         self.frame_1 = self.image
 
         print "image_gradient"
-        gradient_image = np.zeros((32, 32, 3), dtype=np.uint8)
+        # gradient_image = np.zeros((32, 32, 3), dtype=np.uint8)
+        gradient = np.zeros((32, 32), dtype=np.uint16)
         if self.dt is not None:
             pxl = [np.float32([[u, v]]) for u in range(0, 32) for v in range(0, 32)]
             pos = [self.p_NIT.transform(self.p_NIT.inv_hom, p) for p in pxl]
-            gradient = np.array([self.get_gradient(vel, position) for position in pos])
-            gradient = gradient.reshape((32, 32, 3))
-            # print gradient
-            self.max_value.append(np.amax(gradient))
-            self.min_value.append(np.amin(gradient))
 
-            # flat_grad = gradient.flatten()
-            # plt.hist(flat_grad, bins=20)
-            # plt.title("Histogram with 'auto' bins")
-            # plt.show()
-            gradient_image = np.array([self.convert_value(grad) for grad in gradient])
-            gradient_image = gradient_image.reshape((32, 32, 3))
-            # print gradient_image
+            gradient = np.array([self.get_gradient(vel, position) for position in pos])
+            gradient = gradient.reshape((32, 32))
+            # print gradient
+            self.max_value.append(np.nanmax(gradient))
+            self.min_value.append(np.nanmin(gradient))
+
+            # gradient_image = np.array([self.convert_value(grad) for grad in gradient])
+            # gradient_image = gradient_image.reshape((32, 32, 3))
+            # print gradient
 
         self.frame_0 = self.frame_1
-        return gradient_image
+        return gradient
 
     def get_ds(self, time, vel):
         if self.time is not None:
@@ -165,13 +184,13 @@ class CoolRate_adv():
             pxl_pos_1 = self.p_NIT.transform(self.p_NIT.hom, pos_1)
             intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
 
-            if np.array_equal(intensity_0, np.float32([-1, -1, -1])) or np.array_equal(intensity_1, np.float32([-1, -1, -1])):
-                gradient = np.float32([-3000, -3000, -3000])
+            if intensity_0 == -1 or intensity_1 == -1:
+                gradient = np.nan
             else:
                 gradient = (intensity_1 - intensity_0)/self.dt
             return gradient
         else:
-            return np.float32([-1, -1, -1])
+            return np.nan
 
     def get_position(self, position):
         if self.dt is not None:
@@ -181,12 +200,12 @@ class CoolRate_adv():
             return None
 
     def get_value_pixel(self, frame, pxl, rng=3):
-        intensity = np.float32([-1, -1, -1])
+        intensity = -1
         limits = (rng - 1)/2
         if (pxl[0]-limits) < 0 or (pxl[0]+limits) > 31 or (pxl[1]-limits) < 0 or (pxl[1]+limits) > 31:
             return intensity
         else:
-            intensity = np.float32([0, 0, 0])
+            intensity = 0
             for i in range(-limits, limits+1):
                 for j in range(-limits, limits+1):
                     index_i = pxl[0] + i
@@ -195,9 +214,12 @@ class CoolRate_adv():
             intensity = intensity/(rng*rng)
             return intensity
 
-    def convert_value(self, gradient, inf_limit=-800, sup_limit=800):
-        dp = 255.0/(sup_limit-inf_limit)
-        grad = (gradient - inf_limit) * dp
+    def convert_value(self, gradient, inf_limit=-2000, sup_limit=2000):
+        if np.array_equal(gradient, np.float32([np.nan, np.nan, np.nan])):
+            grad = np.float32([np.nan, np.nan, np.nan])
+        else:
+            dp = 255.0/(sup_limit-inf_limit)
+            grad = (gradient - inf_limit) * dp
         return grad
 
 

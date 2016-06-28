@@ -32,12 +32,12 @@ class TCP_to_cam():
         return pb
 
     def calculate_intersection(self, pb_1, pb_2, pb_3, pb_4, pb_5, pb_6):
-        i_13 = Intersection(pb_1, pb_2)
-        i_24 = Intersection(pb_3, pb_4)
-        i_35 = Intersection(pb_3, pb_5)
+        i_12 = Intersection(pb_1, pb_2)
+        i_23 = Intersection(pb_2, pb_3)
+        i_34 = Intersection(pb_3, pb_4)
         i_46 = Intersection(pb_4, pb_6)
-        int_x = [i_13.x, i_24.x, i_35.x, i_46.x]
-        int_y = [i_13.y, i_24.y, i_35.y, i_46.y]
+        int_x = [i_12.x, i_23.x, i_34.x, i_46.x]
+        int_y = [i_12.y, i_23.y, i_34.y, i_46.y]
         print 'X:', int_x
         print 'Y:', int_y
         x = np.mean(int_x)
@@ -55,6 +55,7 @@ if __name__ == '__main__':
     # img1 = cv2.imread(os.path.join(dirname, 'pose1.jpg'))
     # pnts1 = tcp.read_image(img1, scale)
 
+#TCP1
     tcp0 = np.float32([[329, 288.9]])
     pnts1 = np.float32([[177.5, 394]])
     pnts2 = np.float32([[221, 386.5]])
@@ -63,8 +64,6 @@ if __name__ == '__main__':
     pnts5 = np.float32([[431.5, 322]])
     pnts6 = np.float32([[504.5, 290.5]])
     pnts7 = np.float32([[562, 250.5]])
-
-
 
     h = Homography()
     # hom = np.float32([[0.341, -0.002, -2.588],
@@ -83,6 +82,7 @@ if __name__ == '__main__':
     pnts7 = h.transform(hom, pnts7)
 
     print "Ptos:", pnts1, pnts2, pnts3, pnts4, pnts5,  pnts6, pnts7
+
     tcp0 = h.transform(hom, tcp0)
     print " "
     print "Ideal TCP:", tcp0

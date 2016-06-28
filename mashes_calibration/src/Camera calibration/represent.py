@@ -51,7 +51,7 @@ if __name__ == '__main__':
                              [0, 500],
                              [500, 500]])
 
-    im_ueye = cv2.imread('frame011.jpg')
+    im_ueye = cv2.imread('../../data/calibration/vis/frame07.jpg')
     r1 = Representation()
 
     #pxls_pattern_uEye = np.float32([[425.3, 108.7], [579.3, 118.0], [412.7, 262.0], [572.7, 276.0]])
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 #------------------
 #------------------
 
-    im_NIT = cv2.imread('frame11.jpg')
+    im_NIT = cv2.imread('../../data/calibration/nit/frame7.jpg')
     r2 = Representation()
 
     #pxls_pattern_NIT = np.float32([[7.77, 16.29], [10.56, 16.14], [7.65, 18.96], [10.65, 18.9]])

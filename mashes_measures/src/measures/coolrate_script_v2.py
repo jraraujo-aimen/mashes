@@ -86,11 +86,11 @@ class CoolRate_adv():
                 cv2.imshow("Pre", image_resized_1)
 
                 image_gradient = self.image_gradient()
-                image_resized_2 = cv2.resize(image_gradient, (500, 500), interpolation=cv2.INTER_LINEAR)
+                # image_resized_2 = cv2.resize(image_gradient, (500, 500), interpolation=cv2.INTER_LINEAR)
                 # plt.hist(image_resized_2.ravel(), 265, [0, 265])
                 # plt.show()
 
-                cv2.imshow("image_gradient", image_resized_2)
+                # cv2.imshow("image_gradient", image_resized_2)
 
                 frame_1 = self.frame_1.copy()
                 image_resized_3 = cv2.resize(frame_1, (500, 500), interpolation=cv2.INTER_LINEAR)
@@ -129,11 +129,15 @@ class CoolRate_adv():
         if self.dt is not None:
             pxl = [np.float32([[u, v]]) for u in range(0, 32) for v in range(0, 32)]
             pos = [self.p_NIT.transform(self.p_NIT.inv_hom, p) for p in pxl]
+
+            x = y = np.arange(0, 255, 1)
+            X, Y = np.meshgrid(x, y)
+
             gradient = np.array([self.get_gradient(vel, position) for position in pos])
             gradient = gradient.reshape((32, 32, 3))
             # print gradient
-            self.max_value.append(np.amax(gradient))
-            self.min_value.append(np.amin(gradient))
+            self.max_value.append(np.nanmax(gradient))
+            self.min_value.append(np.nanmin(gradient))
 
             # flat_grad = gradient.flatten()
             # plt.hist(flat_grad, bins=20)
@@ -141,7 +145,7 @@ class CoolRate_adv():
             # plt.show()
             gradient_image = np.array([self.convert_value(grad) for grad in gradient])
             gradient_image = gradient_image.reshape((32, 32, 3))
-            # print gradient_image
+            print gradient_image
 
         self.frame_0 = self.frame_1
         return gradient_image
@@ -166,12 +170,12 @@ class CoolRate_adv():
             intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
 
             if np.array_equal(intensity_0, np.float32([-1, -1, -1])) or np.array_equal(intensity_1, np.float32([-1, -1, -1])):
-                gradient = np.float32([-3000, -3000, -3000])
+                gradient = np.float32([np.nan, np.nan, np.nan])
             else:
                 gradient = (intensity_1 - intensity_0)/self.dt
             return gradient
         else:
-            return np.float32([-1, -1, -1])
+            return np.float32([np.nan, np.nan, np.nan])
 
     def get_position(self, position):
         if self.dt is not None:
@@ -195,9 +199,12 @@ class CoolRate_adv():
             intensity = intensity/(rng*rng)
             return intensity
 
-    def convert_value(self, gradient, inf_limit=-800, sup_limit=800):
-        dp = 255.0/(sup_limit-inf_limit)
-        grad = (gradient - inf_limit) * dp
+    def convert_value(self, gradient, inf_limit=-2000, sup_limit=2000):
+        if np.array_equal(gradient, np.float32([np.nan, np.nan, np.nan])):
+            grad = np.float32([np.nan, np.nan, np.nan])
+        else:
+            dp = 255.0/(sup_limit-inf_limit)
+            grad = (gradient - inf_limit) * dp
         return grad
 
 

@@ -24,7 +24,7 @@ class Projection():
         self.hom = np.array(data['hom'])
         self.inv_hom = np.array(data['inv_hom'])
         self.hom_vis = np.array(data['hom_vis'])
-        self.inv_hom_vis = linalg.inv(self.Frame)
+        self.inv_hom_vis = linalg.inv(self.hom_vis)
 
     def project_image(self, image, h):
         im_measures = cv2.warpPerspective(image, h, (500, 500))
