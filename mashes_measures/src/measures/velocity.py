@@ -11,16 +11,13 @@ class Velocity():
             speed = 0
             vel = np.array([0, 0, 0])
         else:
-            dt = time - self.time
-            dp = position - self.position
-            speed = np.sqrt(np.sum(dp * dp)) / dt
-            vel = np.around(dp / dt, decimals=4)
-        if speed < 0.0005:
-            speed = 0.0
-
+            vel = (position - self.position) / (time - self.time)
+            speed = np.sqrt(np.sum(vel * vel))
+        if speed < 0.0002:
+            speed = 0
         self.time = time
         self.position = position
-        return np.around(speed, decimals=4), np.around(vel, decimals=4)
+        return np.around(speed, decimals=4), np.around(vel, decimals=5)
 
 
 if __name__ == '__main__':

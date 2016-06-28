@@ -18,7 +18,7 @@ class NdVelocity():
         self.msg_velocity = MsgVelocity()
         self.listener = tf.TransformListener()
 
-        r = rospy.Rate(10)  # 10hz
+        r = rospy.Rate(25)  # 10hz
         while not rospy.is_shutdown():
             try:
                 self.pub_velocity()
@@ -48,6 +48,7 @@ class NdVelocity():
         except (tf.Exception, tf.LookupException, tf.ConnectivityException,
                 tf.ExtrapolationException):
             rospy.loginfo("TF Exception")
+
 
 if __name__ == '__main__':
     try:

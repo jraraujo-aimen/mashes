@@ -25,7 +25,7 @@ class NdTachyon():
 
         bridge = CvBridge()
 
-        mode = rospy.get_param('~mode', 'mono8')
+        mode = rospy.get_param('~mode', 'mono16')
         config_file = rospy.get_param('~config', 'tachyon.yml')
 
         path = rospkg.RosPack().get_path('mashes_tachyon')
@@ -45,6 +45,8 @@ class NdTachyon():
                 frame = tachyon.process_frame(frame)
                 if mode == 'rgb8':
                     frame = LUT_IRON[frame]
+                elif mode == 'mono16':
+                    frame = np.uint16(frame)
                 else:
                     frame = np.uint8(frame >> 2)
                 image_msg = bridge.cv2_to_imgmsg(frame, encoding=mode)

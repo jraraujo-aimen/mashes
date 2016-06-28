@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import rospy
-import numpy as np
 
 from mashes_measures.msg import MsgGeometry
 from mashes_measures.msg import MsgVelocity
