@@ -3,75 +3,46 @@ import os
 import csv
 import cv2
 import glob
-import math
 import numpy as np
 
 from measures.projection import Projection
-from matplotlib import pyplot as plt
-
-
-class Velocity():
-    def __init__(self):
-        self.t_v = 0
-        self.speed = 0
-        self.vx = 0
-        self.vy = 0
-        self.vz = 0
-
-
-    def load_velocity(self, row):
-        self.t_v = float(row[0])
-        self.speed = float(row[1])
-        self.vx = float(row[2])
-        self.vy = float(row[3])
-        self.vz = float(row[4])
 
 
 class CoolRate_adv():
     def __init__(self):
-        self.color = (0, 0, 0)
         self.start = False
         self.laser_on = False
         self.p_NIT = Projection()
         self.p_NIT.load_configuration('../../../mashes_calibration/config/NIT_config.yaml')
 
-        self.max_value = []
-        self.max_i = []
-        self.min_value = []
-        self.min_i = []
+        # self.img = img
+        # self.vel = vel
 
         self.time = None
         self.dt = None
         self.ds = None
         self.size = (500, 500, 3)
-        self.frame_0 = np.zeros((32, 32, 3), dtype=np.uint8)
-        self.frame_1 = np.zeros((32, 32, 3), dtype=np.uint8)
-        self.image = np.zeros((32, 32, 3), dtype=np.uint8)
-
-
-        self.velocity = Velocity()
+        self.frame_0 = np.zeros(self.size, dtype=np.uint8)
 
     def load_image(self, dir_frame):
-        frame = cv2.imread(dir_frame, 1)
-        # if frame.encoding == 'rgb8':
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # print frame.shape
-        self.image = frame
-        # if data.encoding == 'mono8':
-        #     self.frame = cv2.cvtColor(self.frame, cv2.COLOR_GRAY2BGR)
+        name = os.path.basename(dir_frame).split(".")[0]
+        print name
+        frame = cv2.imread(dir_frame)
+        image = self.p_NIT.project_image(frame, self.p_NIT.hom_vis)
+        return image
+
+    def load_velocity(self, dir_file):
+        with open(dir_file, 'rb') as csvfile:
+            reader = csv.reader(csvfile, delimiter=',')
+            for row in reader:
+                print row[0]
 
     def load_data(self, dir_file, dir_frame):
-        t_frames = []
-        d_frames = []
-        for f in sorted(dir_frame):
-            d_frames.append(f)
-            t_frame = int(os.path.basename(f).split(".")[0])
-            t_frames.append(t_frame)
-
         with open(dir_file, 'rb') as csvfile:
             reader = csv.reader(csvfile, delimiter=',')
             row = next(reader)
             for row in reader:
+<<<<<<< HEAD
                 t_v = int(row[0])
                 matrix = [abs(x - t_v) for x in t_frames]
                 i_frame = matrix.index(min(matrix))
@@ -118,91 +89,91 @@ class CoolRate_adv():
         vx = self.velocity.vx*1000
         vy = self.velocity.vy*1000
         vz = self.velocity.vz*1000
+=======
+                t_v = row[0]
+                # for f in sorted(dir_frame):
+                #     print f
+
+    def image_gradient(self, velocity, image):
+        stamp = velocity.header.stamp
+        vx = velocity.vx * 1000
+        vy = velocity.vy * 1000
+        vz = velocity.vz * 1000
+
+>>>>>>> parent of 290dcf2... Update: mashes_calibration code
         vel = np.float32([vx, vy, vz])
 
-        self.get_ds(t, vel)
+        self.get_ds(stamp.to_sec(), vel)
+        gradient_image = np.zeros(self.size, dtype=np.uint8)
 
-        self.frame_1 = self.image
+        for u in range(200, 300):
+            for v in range(200, 300):
+                pxl = np.float32([[u, v]])
+                pxl_2 = self.p_NIT.transform(self.p_NIT.inv_hom_vis, pxl)
+                pos = self.p_NIT.transform(self.p_NIT.inv_hom, pxl_2)
+                gradient = self.get_gradient(vel, stamp, pos)
+                if gradient is not None:
+                    gradient_image[u, v] = self.convert_value(gradient)
 
-        print "image_gradient"
-        gradient_image = np.zeros((32, 32, 3), dtype=np.uint8)
-        if self.dt is not None:
-            pxl = [np.float32([[u, v]]) for u in range(0, 32) for v in range(0, 32)]
-            pos = [self.p_NIT.transform(self.p_NIT.inv_hom, p) for p in pxl]
-            gradient = np.array([self.get_gradient(vel, position) for position in pos])
-            gradient = gradient.reshape((32, 32, 3))
-            # print gradient
-            self.max_value.append(np.amax(gradient))
-            self.min_value.append(np.amin(gradient))
-
-            # flat_grad = gradient.flatten()
-            # plt.hist(flat_grad, bins=20)
-            # plt.title("Histogram with 'auto' bins")
-            # plt.show()
-            gradient_image = np.array([self.convert_value(grad) for grad in gradient])
-            gradient_image = gradient_image.reshape((32, 32, 3))
-            # print gradient_image
-
-        self.frame_0 = self.frame_1
         return gradient_image
 
     def get_ds(self, time, vel):
         if self.time is not None:
             dt = time - self.time
-            self.dt = dt
             self.ds = vel * dt
         self.time = time
 
-    def get_gradient(self, vel, pos=np.float32([[0, 0]])):
+    def get_gradient(self, vel, stamp, image, pos=np.float32([[0, 0]])):
         pos_0 = np.float32([[pos[0][0], pos[0][1], 0]])
+        frame_1 = image
         pos_1 = self.get_position(pos_0)
-        if pos_1 is not None and self.dt < 0.2:
+
+        if pos_1 is not None:
             #get value of the pixel in:
                 #frame_1: position_1
             pxl_pos_0 = self.p_NIT.transform(self.p_NIT.hom, pos_0)
-            intensity_0 = self.get_value_pixel(self.frame_0, pxl_pos_0[0])
-        #         #frame_0: position_0
+            pxl_pos_0_vis = self.p_NIT.transform(self.p_NIT.hom_vis, pxl_pos_0)
+            intensity_0 = self.get_value_pixel(self.frame_0, pxl_pos_0_vis[0])
+                #frame_0: position_0
             pxl_pos_1 = self.p_NIT.transform(self.p_NIT.hom, pos_1)
-            intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
+            pxl_pos_1_vis = self.p_NIT.transform(self.p_NIT.hom_vis, pxl_pos_1)
+            intensity_1 = self.get_value_pixel(frame_1, pxl_pos_1_vis[0])
 
-            if np.array_equal(intensity_0, np.float32([-1, -1, -1])) or np.array_equal(intensity_1, np.float32([-1, -1, -1])):
-                gradient = np.float32([-3000, -3000, -3000])
-            else:
-                gradient = (intensity_1 - intensity_0)/self.dt
+            gradient = (intensity_1 - intensity_0)/self.coolrate.dt
+            self.frame_0 = frame_1
             return gradient
+
         else:
-            return np.float32([-1, -1, -1])
+            self.frame_0 = frame_1
+            return None
 
     def get_position(self, position):
         if self.dt is not None:
+            #position in mm
             position_1 = position + self.ds
             return position_1
         else:
             return None
 
     def get_value_pixel(self, frame, pxl, rng=3):
-        intensity = np.float32([-1, -1, -1])
+        intensity = 0
         limits = (rng - 1)/2
-        if (pxl[0]-limits) < 0 or (pxl[0]+limits) > 31 or (pxl[1]-limits) < 0 or (pxl[1]+limits) > 31:
-            return intensity
-        else:
-            intensity = np.float32([0, 0, 0])
-            for i in range(-limits, limits+1):
-                for j in range(-limits, limits+1):
-                    index_i = pxl[0] + i
-                    index_j = pxl[1] + j
-                    intensity = intensity + frame[index_i, index_j]
-            intensity = intensity/(rng*rng)
-            return intensity
+        for i in range(-limits, limits+1):
+            for j in range(-limits, limits+1):
+                index_i = pxl[0] + i
+                index_j = pxl[1] + j
+                intensity = intensity + frame[index_i, index_j]
+        intensity = intensity/(rng*rng)
+        return intensity
 
-    def convert_value(self, gradient, inf_limit=-800, sup_limit=800):
+    def convert_value(self, gradient, inf_limit=-1200, sup_limit=1200):
         dp = 255.0/(sup_limit-inf_limit)
-        grad = (gradient - inf_limit) * dp
+        grad = (gradient + 1200) * dp
         return grad
-
 
 if __name__ == '__main__':
     coolrate = CoolRate_adv()
+<<<<<<< HEAD
 
     vel_csv = "../../../mashes_calibration/data/coolrate/velocity/velocity.csv"
     vel = os.path.realpath(os.path.join(os.getcwd(), vel_csv))
@@ -210,3 +181,16 @@ if __name__ == '__main__':
     files_NIT = "../../../mashes_calibration/data/coolrate/tachyon/image/*.png"
     f_NIT = glob.glob(os.path.realpath(os.path.join(os.getcwd(), files_NIT)))
     coolrate.load_data(vel, f_NIT)
+=======
+    print "velocity"
+    vel_csv = "../../data/coolrate/topics/velocity/velocity.csv"
+    vel = os.path.realpath(os.path.join(os.getcwd(), vel_csv))
+    coolrate.load_velocity(vel)
+
+    print "images"
+    files_uEye = "../../data/coolrate/topics/camera/image/*.png"
+    f_uEye = glob.glob(os.path.realpath(os.path.join(os.getcwd(), files_uEye)))
+    coolrate.load_data(vel, f_uEye)
+    # for f in sorted(f_uEye):
+    #     image = coolrate.load_image(f)
+>>>>>>> parent of 290dcf2... Update: mashes_calibration code

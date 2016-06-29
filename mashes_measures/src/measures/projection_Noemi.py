@@ -58,9 +58,9 @@ if __name__ == '__main__':
 
     pnt = np.float32([[0, 0]])
     p_uEye = Projection()
-    p_uEye.load_configuration('../config/uEye_config.yaml')
+    p_uEye.load_configuration('../../../mashes_calibration/config/uEye_config.yaml')
     images_uEye = []
-    files_uEye = glob.glob("../data/calibration/vis/frame*.jpg")
+    files_uEye = glob.glob("../../../mashes_calibration/data/calibration/vis/frame*.jpg")
     for f in sorted(files_uEye):
         im_uEye = cv2.imread(f)
         im_uEye_f1 = p_uEye.project_image(im_uEye, p_uEye.hom_vis)
@@ -71,9 +71,9 @@ if __name__ == '__main__':
         cv2.waitKey(0)
 
     p_NIT = Projection()
-    p_NIT.load_configuration('../config/NIT_config.yaml')
+    p_NIT.load_configuration('../../../mashes_calibration/config/NIT_config.yaml')
     images_NIT = []
-    files_NIT = glob.glob("../data/calibration/nit/frame*.jpg")
+    files_NIT = glob.glob("../../../mashes_calibration/data/calibration/nit/frame*.jpg")
     for f in sorted(files_NIT):
         im_NIT = cv2.imread(f)
         im_NIT_f1 = p_NIT.project_image(im_NIT, p_NIT.hom_vis)
