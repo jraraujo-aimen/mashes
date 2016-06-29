@@ -33,7 +33,7 @@ class CoolRate_adv():
         self.start = False
         self.laser_on = False
         self.p_NIT = Projection()
-        self.p_NIT.load_configuration('../../config/NIT_config.yaml')
+        self.p_NIT.load_configuration('../../../mashes_calibration/config/NIT_config.yaml')
 
         self.max_value = []
         self.max_i = []
@@ -226,9 +226,9 @@ class CoolRate_adv():
 if __name__ == '__main__':
     coolrate = CoolRate_adv()
 
-    vel_csv = "../../data/coolrate/velocity/velocity.csv"
+    vel_csv = "../../../mashes_calibration/data/coolrate/velocity/velocity.csv"
     vel = os.path.realpath(os.path.join(os.getcwd(), vel_csv))
 
-    files_NIT = "../../data/coolrate/tachyon/image/*.png"
+    files_NIT = "../../../mashes_calibration/data/coolrate/tachyon/image/*.png"
     f_NIT = glob.glob(os.path.realpath(os.path.join(os.getcwd(), files_NIT)))
     coolrate.load_data(vel, f_NIT)

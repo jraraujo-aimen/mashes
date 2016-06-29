@@ -33,7 +33,7 @@ class CoolRate_adv():
         self.start = False
         self.laser_on = False
         self.p_NIT = Projection()
-        self.p_NIT.load_configuration('../../config/NIT_config.yaml')
+        self.p_NIT.load_configuration('../../../mashes_calibration/config/NIT_config.yaml')
 
         self.max_value = []
         self.max_i = []
@@ -96,7 +96,7 @@ class CoolRate_adv():
                 image_resized_3 = cv2.resize(frame_1, (500, 500), interpolation=cv2.INTER_LINEAR)
                 cv2.imshow("Post", image_resized_3)
 
-                dir_folder = os.path.abspath(os.path.join(os.getcwd(), "../../data/coolrate/result"))
+                dir_folder = os.path.abspath(os.path.join(os.getcwd(), "../../../mashes_calibration/data/coolrate/result"))
                 if not os.path.exists(dir_folder):
                     os.makedirs(dir_folder)
                 name_file = os.path.join(dir_folder, os.path.basename(d_f))
@@ -204,9 +204,9 @@ class CoolRate_adv():
 if __name__ == '__main__':
     coolrate = CoolRate_adv()
 
-    vel_csv = "../../data/coolrate/velocity/velocity.csv"
+    vel_csv = "../../../mashes_calibration/data/coolrate/velocity/velocity.csv"
     vel = os.path.realpath(os.path.join(os.getcwd(), vel_csv))
 
-    files_NIT = "../../data/coolrate/tachyon/image/*.png"
+    files_NIT = "../../../mashes_calibration/data/coolrate/tachyon/image/*.png"
     f_NIT = glob.glob(os.path.realpath(os.path.join(os.getcwd(), files_NIT)))
     coolrate.load_data(vel, f_NIT)
