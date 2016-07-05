@@ -14,9 +14,13 @@ pnts = np.float32([[0, 0],
 
 
 class Projection():
-    def __init__(self):
-        #self.hom = np.zeros(3, 3)
-        print ""
+    def __init__(self, config=None):
+        self.hom = np.eye(3)
+        self.inv_hom = np.eye(3)
+        self.hom_vis = np.eye(3)
+        self.inv_hom_vis = np.eye(3)
+        if config is not None:
+            self.load_configuration(config)
 
     def load_configuration(self, filename):
         with open(filename, 'r') as f:
@@ -24,7 +28,7 @@ class Projection():
         self.hom = np.array(data['hom'])
         self.inv_hom = np.array(data['inv_hom'])
         self.hom_vis = np.array(data['hom_vis'])
-        self.inv_hom_vis = linalg.inv(self.Frame)
+        self.inv_hom_vis = linalg.inv(self.hom_vis)
 
     def project_image(self, image, h):
         im_measures = cv2.warpPerspective(image, h, (500, 500))

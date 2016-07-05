@@ -49,6 +49,18 @@ class Utils(object):
             else:
                 pass
 
+    def mouse_handler_one(self, event, x, y, flags, data_one):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            if len(data_one['points']) < 1:
+                cv2.circle(data_one['im'], (x, y), 3, (0, 0, 255), 5, 16)
+                cv2.imshow("Image", data_one['im'])
+                len_points = len(data_one['points'])
+                if len_points == 0:
+                    self.point_1 = (x, y)
+                data_one['points'].append([x, y])
+            else:
+                pass
+
     def origin_vectors(self, point_1, point_2, point_3):
         self.A_1 = point_2[1] - point_1[1]
         self.B_1 = point_1[0] - point_2[0]
@@ -102,7 +114,7 @@ class Utils(object):
             if len(coord_points) < 4:
                 coord_points.append([x, y])
         coord_points = np.vstack(coord_points).astype(float)
-        return  np.float32(coord_points)
+        return np.float32(points)
 
 
     def get_two_points(self, im):
@@ -120,38 +132,46 @@ class Utils(object):
         points = np.vstack(data_two['points']).astype(float)
         return points
 
+    def get_point(self, im):
 
-    def points_average(self, image):
+        # Set up data to send to mouse handler
+        data_one = {}
+        data_one['im'] = im.copy()
+        data_one['points'] = []
+        #Set the callback function for any mouse event
+        cv2.imshow("Image", im)
+        cv2.setMouseCallback("Image", self.mouse_handler_one, data_one)
+        cv2.waitKey(0)
+
+        # Convert array to np.array
+        points = np.vstack(data_one['points']).astype(float)
+        return points
+
+    def points_average(self, image, points=4):
         pts = []
         print '''
-            Click on the four corners of the pattern -- top left first and
+            Click on the four/two/one corner/s of the pattern -- top left first and
             bottom rigth last -- and then hit ENTER
             '''
-        pts_ptr = self.get_four_points(image)
-        pts.append(pts_ptr)
-        for i in range(self.STEPS - 1):
-            print '''
-                Repit selection one more time -- and then hit ENTER
-                '''
+        if points == 4:
             pts_ptr = self.get_four_points(image)
-            pts.append(pts_ptr)
+        elif points == 2:
+            pts_ptr = self.get_two_points(image)
+        elif points == 1:
+            pts_ptr = self.get_point(image)
 
-        pts_mean = np.mean(pts, axis=0)
-        return pts_mean
-
-    def points_average_rotate(self, image):
-        pts = []
-        print '''
-            Click on the two rigth corners of the pattern -- top rigth first and
-            bottom rigth last -- and then hit ENTER
-            '''
-        pts_ptr = self.get_two_points(image)
         pts.append(pts_ptr)
         for i in range(self.STEPS - 1):
             print '''
                 Repit selection one more time -- and then hit ENTER
                 '''
-            pts_ptr = self.get_two_points(image)
+            if points == 4:
+                pts_ptr = self.get_four_points(image)
+            elif points == 2:
+                pts_ptr = self.get_two_points(image)
+            elif points == 1:
+                pts_ptr = self.get_point(image)
+
             pts.append(pts_ptr)
 
         pts_mean = np.mean(pts, axis=0)
