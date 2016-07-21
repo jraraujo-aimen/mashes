@@ -18,7 +18,7 @@ class NdVelocity():
         self.msg_velocity = MsgVelocity()
         self.listener = tf.TransformListener()
 
-        r = rospy.Rate(25)  # 10hz
+        r = rospy.Rate(10)  # 10hz
         while not rospy.is_shutdown():
             try:
                 self.pub_velocity()
@@ -27,9 +27,6 @@ class NdVelocity():
             r.sleep()
 
     def pub_velocity(self):
-        # Make sure we see the world and tcp frames
-        self.listener.waitForTransform(
-            "/world", "/tcp0", rospy.Time(), rospy.Duration(5.0))
         try:
             stamp = rospy.Time.now()
             self.listener.waitForTransform(

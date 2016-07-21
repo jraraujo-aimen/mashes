@@ -13,7 +13,7 @@ class Velocity():
         else:
             vel = (position - self.position) / (time - self.time)
             speed = np.sqrt(np.sum(vel * vel))
-        if speed < 0.0002:
+        if speed < 0.00025:
             speed = 0
         self.time = time
         self.position = position
