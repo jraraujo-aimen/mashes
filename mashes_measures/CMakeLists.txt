@@ -12,11 +12,11 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-# Declare the message files to be built
  add_message_files(FILES
                    MsgGeometry.msg
                    MsgVelocity.msg
                    MsgStatus.msg)
+
 catkin_python_setup()
 
 generate_messages(

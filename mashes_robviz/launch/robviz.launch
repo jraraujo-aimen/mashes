@@ -10,9 +10,5 @@
       <arg name="gui" value="false" />
     </include>
 
-    <!-- <include file="$(find cladplus_data)/launch/cladviz.launch">
-      <arg name="sim" value="true" />
-    </include> -->
-
     <node name="robviz" pkg="mashes_robviz" type="robviz.py"/>
 </launch>
