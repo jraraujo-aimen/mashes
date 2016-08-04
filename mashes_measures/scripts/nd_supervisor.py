@@ -14,7 +14,7 @@ class NdSupervisor():
             '/supervisor/status', MsgStatus, queue_size=10)
 
         rospy.Subscriber(
-            '/camera/geometry', MsgGeometry, self.cb_geometry, queue_size=1)
+            '/tachyon/geometry', MsgGeometry, self.cb_geometry, queue_size=1)
         rospy.Subscriber(
             '/velocity', MsgVelocity, self.cb_velocity, queue_size=1)
 
