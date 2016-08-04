@@ -1,11 +1,14 @@
 <launch>
-  <node name="tachyon" pkg="mashes_tachyon" type="pub_tachyon.py">
+  <arg name="gui" default="true" />
+
+  <node name="tachyon" pkg="mashes_tachyon" type="nd_tachyon.py">
     <param name="image" type="str" value="/tachyon/image" />
-    <param name="mode" type="str" value="rgb8" />
+    <param name="mode" type="str" value="mono16" />
+    <!-- <param name="mode" type="str" value="rgb8" /> -->
     <param name="config" type="str" value="tachyon.yml" />
   </node>
-  
-  <node name="tachyon_viewer" pkg="image_view" type="image_view">
+
+  <node name="tachyon_viewer" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/tachyon/image" />
   </node>
 </launch>

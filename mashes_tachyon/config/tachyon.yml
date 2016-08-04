@@ -1,6 +1,6 @@
 configuration:
-    int_time: 500.0
-    wait_time: 500.0
+    int_time: 200.0
+    wait_time: 800.0
     bias: 1
     vth_value: 256
     timeout: 1000

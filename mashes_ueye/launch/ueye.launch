@@ -1,7 +1,9 @@
 <launch>
-  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />
+  <arg name="gui" default="true" />
 
-  <node pkg="nodelet" type="nodelet" name="ueye_cam_nodelet"
+  <!--<node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />-->
+
+  <node pkg="nodelet" type="nodelet" name="camera_nodelet"
         args="load ueye_cam/ueye_cam_nodelet nodelet_manager">
     <param name="camera_name" type="str" value="camera" />
     <param name="camera_topic" type="str" value="image" />
@@ -9,35 +11,17 @@
     <param name="camera_intrinsics_file" type="string" value="" /> <!-- default: ~/.ros/camera_info/<camera_name>.yaml -->
     <param name="camera_parameters_file" type="string" value="" /> <!-- default: ~/.ros/camera_conf/<camera_name>.ini -->
 
-    <param name="ext_trigger_mode" type="bool" value="False" /> <!-- if False, then camera will operate in free-run mode; otherwise, frames need to be triggered by hardware signal (falling-edge) on digital input pin of camera -->
-
-    <!-- the following are optional camera configuration parameters:
-         they will be loaded on the camera after the .ini configuration
-         file, and before dynamic_reconfigure. That means that any
-         (lingering) dynamic parameters from dynamic_reconfigure will
-         override these values, and that these will override parameters
-         from the .ini file.
-         See http://www.ros.org/wiki/ueye_cam for more details. -->
+    <param name="ext_trigger_mode" type="bool" value="False" />
 
     <param name="color_mode" type="str" value="mono8" />
 
-<<<<<<< HEAD
     <param name="image_width" type="int" value="640" />
     <param name="image_height" type="int" value="512" />
-    <param name="image_top" type="int" value="0" />
-    <param name="image_left" type="int" value="0" />
+    <param name="image_top" type="int" value="170" />
+    <param name="image_left" type="int" value="485" />
 
     <param name="subsampling" type="int" value="1" />
     <param name="binning" type="int" value="4" />
-=======
-    <param name="image_width" type="int" value="1024" />
-    <param name="image_height" type="int" value="1024" />
-    <param name="image_top" type="int" value="0" />
-    <param name="image_left" type="int" value="128" />
-
-    <param name="subsampling" type="int" value="1" />
-    <param name="binning" type="int" value="2" />
->>>>>>> 9445006b33f75a606250f5df1ce28313c13c3d8d
     <param name="sensor_scaling" type="double" value="1.0" />
 
     <param name="auto_gain" type="bool" value="True" />
@@ -59,7 +43,7 @@
     <param name="pixel_clock" type="int" value="68" />
   </node>
 
-  <node name="viewer" pkg="image_view" type="image_view">
+  <node name="camera_viewer" pkg="image_view" type="image_view" if="$(arg gui)">
     <remap from="image" to="/camera/image" />
   </node>
 </launch>
