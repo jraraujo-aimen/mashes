@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mashes_ueye</name>
-  <version>0.3.0</version>
+  <version>0.4.0</version>
   <description>The mashes_ueye package</description>
   <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
   <license>BSD</license>

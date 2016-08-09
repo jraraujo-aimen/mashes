@@ -11,6 +11,7 @@
   <node name="geometry_tachyon" pkg="mashes_measures" type="nd_geometry.py">
     <param name="threshold" type="int" value="200" />
     <param name="image" type="str" value="/tachyon/image" />
+    <param name="threshold" type="int" value="200" />
     <param name="config" type="str" value="$(find mashes_measures)/config/tachyon.yaml" />
   </node>
   <node name="geometry_camera" pkg="mashes_measures" type="nd_geometry.py">
@@ -22,6 +23,7 @@
   <node name="moments_tachyon" pkg="mashes_measures" type="nd_moments.py">
     <param name="threshold" type="int" value="200" />
     <param name="image" type="str" value="/tachyon/image" />
+    <param name="threshold" type="int" value="200" />
     <param name="config" type="str" value="$(find mashes_measures)/config/tachyon.yaml" />
   </node>
   <node name="moments_camera" pkg="mashes_measures" type="nd_moments.py">

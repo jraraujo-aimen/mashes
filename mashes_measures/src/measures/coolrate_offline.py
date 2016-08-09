@@ -3,11 +3,13 @@ import os
 import csv
 import cv2
 import glob
+import math
 import numpy as np
 
 from measures.projection import Projection
 import matplotlib.pyplot as plt
 from scipy import linalg
+from scipy import stats
 
 #-----------------------------additional classes------------------------------#
 
@@ -29,8 +31,6 @@ class RingBuffer():
             self.complete = True
 
         if not self.complete:
-            print "data", self.data
-            print "index", self.index
             self.data[self.index] = x
             self.index = self.index + 1
         else:
@@ -65,11 +65,14 @@ class CoolRate_adv():
         self.size_sensor = 32
         self.init_points = 2
         self.num_points = 10
+        self.num_points_fitted = 5
         self.frame_sample = 48
-        self.laser_threshold = 70
-        self.w_ppal = 0.7
-        self.w_side = 0.05
-        self.w_diag = 0.025
+        self.laser_threshold = 80
+        self.rate_gradient = 4
+        self.thr_no_laser = 40
+        self.w_ppal = 0.9
+        self.w_side = 0.015
+        self.w_diag = 0.01
         self.scale_vis = 13
         self.pause_plot = 0.05
         self.pause_image = 100
@@ -104,6 +107,14 @@ class CoolRate_adv():
         self.matrix_intensity = [RingBuffer(a) for a in self.sizes]
         self.matrix_point = [RingBuffer(a) for a in self.sizes]
         self.matrix_pxl_point = [RingBuffer(a) for a in self.sizes]
+        self.total_t = RingBuffer(self.num_points)
+        self.dt_axis = []
+        self.t_axis = []
+        self.total_intensity = []
+
+        self.coeff_1 = []
+        self.coeff_2 = []
+        self.coeff_3 = []
 
         self.velocity = Velocity()
 
@@ -120,7 +131,23 @@ class CoolRate_adv():
             t_frame = int(os.path.basename(f).split(".")[0])
             t_frames.append(t_frame)
 
+
         with open(dir_file, 'rb') as csvfile:
+
+            fig_0 = plt.figure()
+            fig_0.suptitle('Data and Fitted Function')
+            ax1_0 = fig_0.add_subplot(211)
+            ax1_0.set_title('Data')
+            ax1_0.set_xlabel('point')
+            ax1_0.set_ylabel('value')
+            ax1_0.set_xlim([0, self.num_points-1])
+            ax1_0.set_ylim([0, 256])
+            ax2_0 = fig_0.add_subplot(212)
+            ax2_0.set_title('Fitted')
+            ax2_0.set_xlabel('point')
+            ax2_0.set_ylabel('value')
+            ax2_0.set_xlim([0, self.num_points-1])
+            ax2_0.set_ylim([0, 256])
 
             reader = csv.reader(csvfile, delimiter=',')
             row = next(reader)
@@ -159,14 +186,27 @@ class CoolRate_adv():
 
                                 #vvvvviiiiiissssssssssssssssssssssssssssssssss#
                                 img = self.image.copy()
+                                self.total_intensity.append(intensity)
 
-                                plt.axis([0, self.num_points, 0, 256])
                                 plt.ion()
                                 x = np.arange(self.num_points).tolist()
-                                plt.plot(x, intensity)
+                                ax1_0.plot(x, intensity)
                                 plt.pause(self.pause_plot)
-                                plt.title("Pixel intensity")
-                                plt.xlabel("index")
+
+                                x_a = np.array(x)
+                                intensity_f = np.array(intensity[:self.num_points_fitted])
+                                x_f = np.array(np.arange(self.num_points_fitted).tolist())
+                                # Exponential Fit (Note that we have to provide the y-offset ("C") value!!
+                                A, K = self.fit_exp_linear(x_f, intensity_f, self.thr_no_laser)
+                                fit_y = self.model_func(x_a, A, K, self.thr_no_laser)
+                                self.coeff_1.append(A)
+                                self.coeff_2.append(K)
+                                print "Fit y", fit_y
+                                plt.ion()
+                                ax2_0.plot(x, fit_y)
+                                plt.pause(self.pause_plot)
+
+
 
                                 w, h = img.shape
                                 img_rgb = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
@@ -178,9 +218,71 @@ class CoolRate_adv():
                                         cv2.circle(img_plus, (int(round(p[0][0])*self.scale_vis), int(round(p[0][1])*self.scale_vis)), 4, self.color, -1)
                                 cv2.imshow("Image: ", img_plus)
                                 cv2.waitKey(self.pause_image)
+                                print "Total t", self.total_t.data
+                                self.t_axis.append(float(self.total_t.data[0])/1000000)
                                 #vvvvviiiiiissssssssssssssssssssssssssssssssss#
+
+
+            x_t = [self.t_axis[t] - self.t_axis[0] for t in range(len(self.t_axis))]
+            fig_1 = plt.figure()
+            fig_1.suptitle('Fitted Function:\n y = A e^(K t) + 0')
+
+            ax1 = fig_1.add_subplot(211)
+            ax1.plot(x_t, self.coeff_1)
+            ax1.set_title('A')
+            ax1.set_xlabel('ms')
+            ax1.set_ylabel('value')
+            ax1.set_ylim([0, 400])
+            ax2 = fig_1.add_subplot(212)
+            ax2.plot(x_t, self.coeff_2)
+            ax2.set_title('K')
+            ax2.set_xlabel('ms')
+            ax2.set_ylabel('value')
+            ax2.set_ylim([-1, 0])
+
+
+            mean_coeff_1 = np.nanmean(self.coeff_1)
+            mean_coeff_2 = np.nanmean(self.coeff_2)
+
+            print "Media aritmetica:\n A:", mean_coeff_1, "\n K:", mean_coeff_2
+
+            median_coeff_1 = np.nanmedian(self.coeff_1)
+            median_coeff_2 = np.nanmedian(self.coeff_2)
+
+            print "Mediana ( valor central datos):\n A:", median_coeff_1, "\n K:", median_coeff_2
+
+            var_coeff_1 = np.nanvar(self.coeff_1)
+            var_coeff_2 = np.nanvar(self.coeff_2)
+
+            print "Varianza (dispersion de los datos):\n A:", var_coeff_1, "\n K:", var_coeff_2
+
+            std_coeff_1 = np.nanstd(self.coeff_1)
+            std_coeff_2 = np.nanstd(self.coeff_2)
+
+            print "Desv. tipica (raiz cuadrada desv. tipica):\n A:", std_coeff_1, "\n K:", std_coeff_2
+
+            mode_coeff_1 = stats.mode(self.coeff_1)
+            mode_coeff_2 = stats.mode(self.coeff_2)
+
+            print "Moda (Valor con mayor frecuencia abs):\n A:", mode_coeff_1, "\n K:", mode_coeff_2
+
+            plt.show()
+
+
             while True:
                 plt.pause(self.pause_plot)
+
+
+
+    def fit_exp_linear(self, t, y, C=0):
+        y = y - C
+        y = np.log(y)
+        K, A_log = np.polyfit(t, y, 1)
+        A = np.exp(A_log)
+        return A, K
+
+    def model_func(self, t, A, K, C):
+        return A * np.exp(K * t) + C
 
     def get_maxvalue(self, rng=3):
         image = np.zeros((self.size_sensor, self.size_sensor), dtype=np.uint16)
@@ -296,7 +398,7 @@ class CoolRate_adv():
         pos_0 = np.float32(self.matrix_point[x].data[y])
         pxl_pos_0 = np.float32(self.matrix_pxl_point[x].data[y])
         if not np.isnan(intensity_0):
-            pos_1, pxl_pos_1, intensity_1 = self.get_gradient(vel, intensity_0, pxl_pos_0, pos_0)
+            pos_1, pxl_pos_1, intensity_1 = self.get_next_value(vel, intensity_0, pxl_pos_0, pos_0)
             if pos_1 is not None and pxl_pos_1 is not None and intensity_1 is not None:
                 pxl = np.float32([[pxl_pos_1[0][0], pxl_pos_1[0][1]]])
                 self.matrix_intensity[x+1].append_data(intensity_1)
@@ -311,10 +413,21 @@ class CoolRate_adv():
         if self.time is not None:
             dt = time - self.time
             self.dt = dt
+            self.total_t.append_data(self.time)
             self.ds = vel * dt / 1000000000
         self.time = time
+        print "timeeeee", self.dt
 
-    def get_gradient(self, vel, intensity_0, pxl_pos_0, pos=np.float32([[0, 0]])):
+    def get_gradient(self, rate):
+        intensity_0 = self.matrix_intensity[0].data[0]
+        intensity_1 = self.matrix_intensity[rate].data[0]
+        if intensity_0 == -1 or intensity_1 == -1:
+            gradient = np.nan
+        else:
+            gradient = intensity_1 - intensity_0
+
+
+    def get_next_value(self, vel, intensity_0, pxl_pos_0, pos=np.float32([[0, 0]])):
         pos_0 = np.float32([[pos[0][0], pos[0][1], 0]])
         pos_1 = self.get_position(pos_0)
         if pos_1 is not None and self.dt < 0.2 * 1000000000:
@@ -322,10 +435,10 @@ class CoolRate_adv():
             pxl_pos_1 = self.p_NIT.transform(self.p_NIT.hom, pos_1)
             intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
 
-            if intensity_0 == -1 or intensity_1 == -1:
-                gradient = np.nan
-            else:
-                gradient = (intensity_1 - intensity_0)/self.dt
+            # if intensity_0 == -1 or intensity_1 == -1:
+            #     gradient = np.nan
+            # else:
+            #     gradient = (intensity_1 - intensity_0)/self.dt
 
             return pos_1, pxl_pos_1, intensity_1
         else:
