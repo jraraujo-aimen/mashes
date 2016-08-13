@@ -2,14 +2,15 @@
 import os
 import rospy
 import rospkg
+import numpy as np
 
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 from mashes_tachyon.msg import MsgCalibrate
 
-import numpy as np
-from tachyon.tachyon import Tachyon, LUT_IRON
+from tachyon.tachyon import Tachyon
+from tachyon.tachyon import LUT_IRON
 
 
 class NdTachyon():
