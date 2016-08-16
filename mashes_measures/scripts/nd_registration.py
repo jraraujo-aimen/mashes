@@ -111,6 +111,8 @@ class NdRegistration():
             img_tachyon = self.p_tachyon.draw_ellipse(
                 img_tachyon, self.tachyon_ellipse)
             image = cv2.addWeighted(image, 1, img_tachyon, 0.6, 0)
+        cv2.circle(image, (250, 250), 250, (0, 165, 255), thickness=5, lineType=8, shift=0)
+        # TODO: Clean code to draw velocity vector
         self.p_tachyon.draw_arrow(image, self.speed, self.vel)
         self.pub_image.publish(self.bridge.cv2_to_imgmsg(image, "bgr8"))
 

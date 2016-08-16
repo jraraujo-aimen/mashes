@@ -11,6 +11,7 @@ from python_qt_binding import QtCore
 from mashes_tachyon.msg import MsgCalibrate
 
 from qt_display import QtDisplay
+from qt_plot import QtPlot
 
 
 class QtMeasures(QtGui.QWidget):
@@ -19,10 +20,10 @@ class QtMeasures(QtGui.QWidget):
         path = rospkg.RosPack().get_path('mashes_measures')
         loadUi(os.path.join(path, 'resources', 'measures.ui'), self)
 
-        qtDisplay = QtDisplay(self)
-        # qtDisplay.subscribeTopic('/tachyon/image')
-        qtDisplay.subscribeTopic('/measures/image')
-        self.boxDisplay.addWidget(qtDisplay)
+        self.qtDisplay = QtDisplay(self)
+        self.qtDisplay.subscribeTopic('/measures/image')
+        self.boxDisplay.addWidget(self.qtDisplay)
+        self.boxDisplay.addWidget(QtPlot(self))
 
         self.btnCalibrate.clicked.connect(self.btnCalibrateClicked)
 
@@ -40,5 +41,6 @@ if __name__ == "__main__":
 
     app = QtGui.QApplication(sys.argv)
     qt_measures = QtMeasures()
+    qt_measures.qtDisplay.subscribeTopic('/tachyon/image')
     qt_measures.show()
     app.exec_()

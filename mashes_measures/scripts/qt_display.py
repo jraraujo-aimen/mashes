@@ -16,13 +16,12 @@ from tachyon.tachyon import LUT_IRON
 class QtDisplay(QtGui.QWidget):
     def __init__(self, parent=None, size=64):
         super(QtDisplay, self).__init__(parent)
-        self.parent = parent
         self.setMinimumSize(240, 240)
+        self.setMaximumSize(300, 300)
 
         layout = QtGui.QVBoxLayout()
         layout.setContentsMargins(1, 1, 1, 1)
         self.setLayout(layout)
-        self.setMaximumSize(300, 300)
 
         self.lblCamera = QtGui.QLabel()
         self.lblCamera.setStyleSheet(
@@ -69,6 +68,8 @@ class QtDisplay(QtGui.QWidget):
     def cbImage(self, msg_image):
         try:
             frame = self.bridge.imgmsg_to_cv2(msg_image)
+            if msg_image.encoding == "bgr8":
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             self.image = frame
         except CvBridgeError, e:
             print e
@@ -79,9 +80,6 @@ if __name__ == '__main__':
 
     app = QtGui.QApplication(sys.argv)
     qt_display = QtDisplay()
-
-    image_topic = rospy.get_param('~image', '/tachyon/image')
-    qt_display.subscribeTopic(image_topic)
-
+    qt_display.subscribeTopic('/tachyon/image')
     qt_display.show()
     app.exec_()

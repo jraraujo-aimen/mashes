@@ -28,7 +28,7 @@
     </spacer>
    </item>
    <item row="0" column="0">
-    <layout class="QHBoxLayout" name="boxDisplay"/>
+    <layout class="QVBoxLayout" name="boxDisplay"/>
    </item>
    <item row="3" column="0">
     <widget class="QPushButton" name="btnCalibrate">
