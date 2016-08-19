@@ -14,20 +14,7 @@ from matplotlib.lines import Line2D
 from mashes_measures.msg import MsgGeometry
 from cladplus_control.msg import MsgPower
 
-
-class Filter():
-    def __init__(self, fc=100):
-        self.fc = fc
-        self.y = 0
-        self.t = 0
-
-    def update(self, x, t):
-        DT = t - self.t
-        a = (2 * np.pi * DT * self.fc) / (2 * np.pi * DT * self.fc + 1)
-        y = a * x + (1 - a) * self.y
-        self.y = y
-        self.t = t
-        return y
+from measures.filter import Filter
 
 
 class QtPlot(QtGui.QWidget):
