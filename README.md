@@ -37,10 +37,15 @@ monitoring.
 
 This meta-package contains four packages:
 - mashes_workcell: contains the working cell description files.
-- mashes_ueye: contains the modules required for NIR coaxial monitoring.
+- mashes_robviz: contains the graphical interface for multimodal monitoring.
 - mashes_tachyon: contains the modules required for SWIR/MWIR coaxial monitoring.
+- mashes_ueye: contains the modules required for NIR coaxial monitoring.
 - mashes_measures: contains modules to calculate geometrical measures from NIR
   images.
+
+## Measures
+
+[Measures](./mashes_measures/README.md)
 
 ## Quick start
 
