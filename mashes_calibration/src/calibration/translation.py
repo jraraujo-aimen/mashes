@@ -1,4 +1,4 @@
-import math
+import numpy as np
 
 
 class Translation(object):
@@ -13,4 +13,4 @@ class Translation(object):
         self.dy = self.y2 - self.y1
 
     def distance(self):
-        self.s = math.sqrt(self.dx**2 + self.dy**2)
+        self.s = np.sqrt(self.dx**2 + self.dy**2)

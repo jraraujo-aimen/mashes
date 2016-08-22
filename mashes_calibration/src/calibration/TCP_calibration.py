@@ -1,7 +1,6 @@
-#!/usr/bin/env python
-
 import cv2
 import numpy as np
+
 from utils import Utils
 from bisector import Perp_bisector, Intersection
 
@@ -46,8 +45,8 @@ class TCP_to_cam():
 
 
 if __name__ == '__main__':
-    import os
-    from homography import Homography
+    from calibration.homography import Homography
+
     dirname = '../../data/'
 
     scale = 8
@@ -55,7 +54,7 @@ if __name__ == '__main__':
     # img1 = cv2.imread(os.path.join(dirname, 'pose1.jpg'))
     # pnts1 = tcp.read_image(img1, scale)
 
-#TCP1
+    #TCP1
     tcp0 = np.float32([[329, 288.9]])
     pnts1 = np.float32([[177.5, 394]])
     pnts2 = np.float32([[221, 386.5]])

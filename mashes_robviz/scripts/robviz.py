@@ -99,6 +99,7 @@ class Robviz(QtGui.QMainWindow):
         self.tabWidget.addTab(self.qtMeasures, 'Measures')
         self.tabWidget.setCurrentWidget(self.qtMeasures)
 
+        self.btnQuit.setIcon(QtGui.QIcon.fromTheme('application-exit'))
         self.btnQuit.clicked.connect(self.btnQuitClicked)
 
         self.speed = 0
@@ -107,7 +108,7 @@ class Robviz(QtGui.QMainWindow):
         self.laser_on = False
 
         tmrInfo = QtCore.QTimer(self)
-        tmrInfo.timeout.connect(self.updateInfo)
+        tmrInfo.timeout.connect(self.updateStatus)
         tmrInfo.start(100)
 
     def cbStatus(self, msg_status):
@@ -116,7 +117,7 @@ class Robviz(QtGui.QMainWindow):
         self.speed = msg_status.speed
         self.power = msg_status.power
 
-    def updateInfo(self):
+    def updateStatus(self):
         self.lblSpeed.setText("Speed: %.1f mm/s" % (self.speed))
         self.lblPower.setText("Power: %i W" % (self.power))
         if self.running:

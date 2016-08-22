@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
-import math
 
-class Utils(object):
+
+class Utils():
     def __init__(self):
         self.A_1 = 0
         self.A_2 = 0
@@ -13,7 +13,6 @@ class Utils(object):
         self.point_1 = 0
         self.point_2 = 0
         self.point_3 = 0
-
         self.STEPS = 1
 
     def mouse_handler(self, event, x, y, flags, data):
@@ -33,7 +32,6 @@ class Utils(object):
                 data['points'].append([x, y])
             else:
                 pass
-
 
     def mouse_handler_two(self, event, x, y, flags, data_two):
         if event == cv2.EVENT_LBUTTONDOWN:
@@ -65,36 +63,30 @@ class Utils(object):
         self.A_1 = point_2[1] - point_1[1]
         self.B_1 = point_1[0] - point_2[0]
         self.C_1 = point_1[1]*(point_2[0]-point_1[0]) - point_1[0]*(point_2[1] - point_1[1])
-
         self.A_2 = point_3[1] - point_1[1]
         self.B_2 = point_1[0] - point_3[0]
         self.C_2 = point_1[1]*(point_3[0]-point_1[0]) - point_1[0]*(point_3[1] - point_1[1])
 
-
     def Point2CoordLines(self, point):
-
         den_1 = point[0]*self.A_1 + point[1]*self.B_1 + self.C_1
         if den_1 < 0:
             den_1 = den_1*(-1)
-        num_1 = math.sqrt(self.A_1**2 + self.B_1**2)
+        num_1 = np.sqrt(self.A_1**2 + self.B_1**2)
         if den_1 == 0:
             y = 0
         else:
             y = den_1/num_1
-
         den_2 = point[0]*self.A_2 + point[1]*self.B_2 + self.C_2
         if den_2 < 0:
             den_2 = den_2*(-1)
-        num_2 = math.sqrt(self.A_2**2 + self.B_2**2)
+        num_2 = np.sqrt(self.A_2**2 + self.B_2**2)
         if den_2 == 0:
             x = 0
         else:
             x = den_2/num_2
-
         return x, y
 
     def get_four_points(self, im):
-
         # Set up data to send to mouse handler
         data = {}
         data['im'] = im.copy()
@@ -116,9 +108,7 @@ class Utils(object):
         coord_points = np.vstack(coord_points).astype(float)
         return np.float32(points)
 
-
     def get_two_points(self, im):
-
         # Set up data to send to mouse handler
         data_two = {}
         data_two['im'] = im.copy()
@@ -127,13 +117,11 @@ class Utils(object):
         cv2.imshow("Image", im)
         cv2.setMouseCallback("Image", self.mouse_handler_two, data_two)
         cv2.waitKey(0)
-
         # Convert array to np.array
         points = np.vstack(data_two['points']).astype(float)
         return points
 
     def get_point(self, im):
-
         # Set up data to send to mouse handler
         data_one = {}
         data_one['im'] = im.copy()
@@ -159,7 +147,6 @@ class Utils(object):
             pts_ptr = self.get_two_points(image)
         elif points == 1:
             pts_ptr = self.get_point(image)
-
         pts.append(pts_ptr)
         for i in range(self.STEPS - 1):
             print '''
@@ -171,8 +158,21 @@ class Utils(object):
                 pts_ptr = self.get_two_points(image)
             elif points == 1:
                 pts_ptr = self.get_point(image)
-
             pts.append(pts_ptr)
-
         pts_mean = np.mean(pts, axis=0)
         return pts_mean
+
+    def read_image(self, image, scale=1):
+        h, w = image.shape[:2]
+        image_resized = cv2.resize(
+            image, (scale * w, scale * h), interpolation=cv2.INTER_NEAREST)
+        # Show image and wait for 2 clicks.
+        cv2.imshow("Image", image_resized)
+        pts_image_resized = self.points_average(image_resized)
+        pts_image = pts_image_resized/scale
+        return pts_image
+
+
+if __name__ == '__main__':
+    image = cv2.imread('../../data/nit_sqr.jpg')
+    print Utils().read_image(image, 20)

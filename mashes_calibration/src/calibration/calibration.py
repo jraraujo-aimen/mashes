@@ -1,21 +1,25 @@
+import os
 import cv2
 import yaml
 import numpy as np
-from os.path import basename
 from scipy import linalg
+
 from tcp import TCP
-from homography import Homography
-from represent import Representation
 from angle import Angle
+from utils import Utils
+from represent import Representation
+
+from homography import Homography
 
 
-class Cal_camera():
-    def __init__(self, camera, pnts_pattern):
-        self.rep = Representation()
+class Calibration():
+    def __init__(self, pnts_pattern):
         self.h = Homography(pnts_pattern)
+
+        self.rep = Representation()
         self.tcp = TCP()
         self.a = Angle()
-        self.camera = camera
+
         self.hom = np.zeros((3, 3))
         self.inv_hom = np.zeros((3, 3))
         self.Frame = np.zeros((3, 3))
@@ -23,8 +27,7 @@ class Cal_camera():
         self.hom_final_camera = np.zeros((3, 3))
 
     def get_pxls_homography(self, image, scale=1):
-        pts_image = self.h.read_image(image, scale)
-        return pts_image
+        return Utils().read_image(image, scale)
 
     def calculate_homography(self, pxls_pattern):
         self.hom = self.h.calculate(pxls_pattern)
@@ -39,7 +42,7 @@ class Cal_camera():
 
     def get_pxl_orientation(self, folder, scale=1):
         for f in sorted(folder):
-            name = basename(f)
+            name = os.path.basename(f)
             if name == "move_x.jpg":
                 im_uEye = cv2.imread(f)
                 pxl_pnts_x = self.tcp.read_image(im_uEye, scale)
@@ -49,7 +52,6 @@ class Cal_camera():
             elif name == "move_o.jpg":
                 im_uEye = cv2.imread(f)
                 pxl_pnts_origin = self.tcp.read_image(im_uEye, scale)
-
         return pxl_pnts_origin, pxl_pnts_x, pxl_pnts_y
 
     def calculate_TCP_orientarion(self, pxl_pnts, pxl_pnts_origin, pxl_pnts_x, pxl_pnts_y, dx, dy):
@@ -59,7 +61,6 @@ class Cal_camera():
         return pxl_TCP, factor, angle_y, angle_x
 
     def calculate_angle_TCP(self, origin, axis_x, pattern):
-
         pnt_origin = self.rep.transform(self.hom, origin)
         pnt_x = self.rep.transform(self.hom, axis_x)
         pnt_pattern = self.rep.transform(self.hom, pattern)
@@ -73,7 +74,6 @@ class Cal_camera():
 
     def calculate_frame(self, pxl_TCP, angle):
         pnts_TCP = self.rep.transform(self.hom, pxl_TCP)[0]
-
         a = np.deg2rad(angle)
         self.Frame = np.float32([[np.cos(a),  -np.sin(a), pnts_TCP[0]],
                                 [np.sin(a),  np.cos(a), pnts_TCP[1]],
@@ -86,7 +86,6 @@ class Cal_camera():
         self.inv_Frame = linalg.inv(self.Frame)
 
     def calculate_hom_final(self, img, pnts, corners, pnts_final):
-        # pxls_camera = self.rep.transform(self.inv_hom, pnts)
         im_measures = self.rep.define_camera(img.copy(), self.hom)
         #------------------ Data in (c)mm
         image_axis = self.rep.draw_axis_camera(im_measures, pnts)
@@ -102,32 +101,18 @@ class Cal_camera():
         #------------------
         pxls_corner = self.rep.transform(self.inv_hom, corners_camera)
         self.hom_final_camera, status = cv2.findHomography(pxls_corner.copy(), pnts_final)
-        self.write_config_file()
         return self.hom_final_camera
 
-    def write_config_file(self):
+    def write_config_file(self, filename):
         hom_vis = self.hom_final_camera
         hom_TCP = np.dot(self.inv_hom, self.Frame)
         inv_hom_TCP = np.dot(self.inv_Frame, self.hom)
-        data = dict(
-            hom_vis=hom_vis.tolist(),
-            hom=hom_TCP.tolist(),
-            inv_hom=inv_hom_TCP.tolist(),
-            )
-        filename = '../../config/' + self.camera + '_config.yaml'
+        data = dict(hom_vis=hom_vis.tolist(),
+                    hom=hom_TCP.tolist(),
+                    inv_hom=inv_hom_TCP.tolist())
         with open(filename, 'w') as outfile:
             yaml.dump(data, outfile)
             print data
-
-    def visualize_data(self):
-        print "Homography: "
-        print self.hom
-
-        print "Frame: "
-        print self.Frame
-
-        print "Final homography: "
-        print self.hom_final_camera
 
     def draw_pattern_axis(self, pnts, img):
         pnts_axis_pattern = pnts
@@ -149,35 +134,26 @@ class Cal_camera():
         img_final = self.draw_TCP_axis(pnts, img_TCP)
         return img_final
 
+
 if __name__ == '__main__':
+    import glob
 
-    pnts = np.float32([[0, 0],
-                       [1, 0],
-                       [0, 1]])
+    pattern_points = np.float32([[0, 0], [1.1, 0], [0, 1.1], [1.1, 1.1]])
+    img_points = np.float32([[1, 1], [6, 1], [1, 6], [6, 6]])
+    uEye = Homography(pattern_points)
 
 
-    corners = np.float32([[-3.2, -3.2],
-                          [3.2, -3.2],
-                          [-3.2, 3.2],
-                          [3.2, 3.2]])
+    uEye = Calibration(pattern_points)
+    # hom2 = h.calculate(pnts2)
+    # print pnts2, hom2
+    # print np.around(h.transform(hom2, pnts2), decimals=4)
+    # im = cv2.imread("../../data/calibration/vis/move_o.jpg")
+    # pxls_pattern_uEye = uEye.get_pxls_homography(im)
+    # print pxls_pattern_uEye
+    # uEye.calculate_homography(pxls_pattern_uEye)
 
-    # corners = np.float32([[-2.5, -2.5],
-    #                       [2.5, -2.5],
-    #                       [-2.5, 2.5],
-    #                       [2.5, 2.5]])
-
-    pnts_final = np.float32([[0, 0],
-                             [500, 0],
-                             [0, 500],
-                             [500, 500]])
-
-    pnts_pattern = np.float32([[0, 0], [1.1, 0], [0, 1.1], [1.1, 1.1]])
-
-    uEye = Cal_camera('uEye', pnts_pattern)
-    #pxls_pattern_uEye = np.float32([[425.3, 108.7], [579.3, 118.0], [412.7, 262.0], [572.7, 276.0]])
-    #pxls_pattern_uEye = np.float32([[569, 141], [564, 270], [440, 131], [436, 261]])
     pxls_pattern_uEye = np.float32([[567, 142], [563, 261], [434, 138], [429, 256]])
-    uEye.calculate_homography(pxls_pattern_uEye)
+    print uEye.calculate_homography(pxls_pattern_uEye)
 
     pxl_pnt_origin = np.float32([[501.5, 196]])
     pxl_pnt_x = np.float32([[510, 453]])
@@ -188,22 +164,32 @@ if __name__ == '__main__':
 
     uEye.calculate_frame(pxl_TCP_uEye, angle)
 
+    pnts = np.float32([[0, 0], [1, 0], [0, 1]])
+
+    corners = np.float32([[-3.2, -3.2],
+                          [3.2, -3.2],
+                          [-3.2, 3.2],
+                          [3.2, 3.2]])
+
+    pnts_final = np.float32([[0, 0],
+                             [500, 0],
+                             [0, 500],
+                             [500, 500]])
+
     im_ueye = cv2.imread("../../data/calibration/vis/move_o.jpg")
     hom_final_uEye = uEye.calculate_hom_final(im_ueye, pnts, corners, pnts_final)
 
     img_final_uEye = uEye.rep.define_camera(im_ueye, hom_final_uEye)
     print "uEye parameters: "
-    uEye.visualize_data()
+    print "Homography: ", uEye.hom
+    print "Frame: ", uEye.Frame
+    print "Final homography: ", uEye.hom_final_camera
     img_final_uEye_axis = uEye.draw_axis(pnts, img_final_uEye)
     cv2.imshow("Image uEye final", img_final_uEye_axis)
 
-
-
-
-#------------------
 #------------------
 
-    NIT = Cal_camera('NIT', pnts_pattern)
+    NIT = Calibration(pattern_points)
     #pxls_pattern_NIT = np.float32([[8.19, 15.75], [10.98, 15.72], [8.10, 19.08], [11.04, 19.05]])
     #pxls_pattern_NIT = np.float32([[7.32, 16.05], [7.38, 19.62], [11.04, 15.99], [11.13, 19.53]])
     pxls_pattern_NIT = np.float32([[7.86, 15.72], [7.86, 18.75], [10.83, 15.72], [10.86, 18.69]])
@@ -221,19 +207,71 @@ if __name__ == '__main__':
     hom_final_NIT = NIT.calculate_hom_final(im_NIT, pnts, corners, pnts_final)
 
     img_final_NIT = NIT.rep.define_camera(im_NIT, hom_final_NIT)
-    print "NIT parameters: "
-    NIT.visualize_data()
+    print "NIT homography: ", NIT.hom
     img_final_NIT_axis = NIT.draw_axis(pnts, img_final_NIT)
     cv2.imshow("Image NIT final", img_final_NIT_axis)
 
-
-
-#------------------
-#------------------
-#------------------
 #------------------
 
     img_final = cv2.addWeighted(img_final_uEye_axis, 0.3, img_final_NIT_axis, 0.7, 0)
     cv2.imshow("Image final", img_final)
 
     cv2.waitKey(0)
+
+#------------------
+
+    #---- Origin -----#
+    files = glob.glob("../../data/calibration/vis/frame*.jpg")
+    pxl_pnts = uEye.get_pxl_origin(files)
+    #---- Orientation -----#
+    files_move = glob.glob("../../data/calibration/vis/move*.jpg")
+    pxl_pnts_origin, pxl_pnts_x, pxl_pnts_y = uEye.get_pxl_orientation(files_move)
+    pxl_TCP, factor, angle_y, angle_x = uEye.calculate_TCP_orientarion(pxl_pnts, pxl_pnts_origin, pxl_pnts_x, pxl_pnts_y, 2, 3)
+
+    angle = uEye.calculate_angle_TCP(pxl_pnts_origin, pxl_pnts_x, pxls_pattern_uEye)
+    print "Angle TCP uEye: ", angle
+    uEye.calculate_frame(pxl_TCP, angle)
+
+    hom_final_uEye = uEye.calculate_hom_final(im, pnts, corners, pnts_final)
+    filename = '../../config/uEye_config.yaml'
+    uEye.write_config_file(filename)
+
+    files = glob.glob("../../data/calibration/vis/frame*.jpg")
+    for f in sorted(files):
+        im_uEye = cv2.imread(f)
+        img_final_uEye = uEye.rep.define_camera(im_uEye, hom_final_uEye)
+        img_final_uEye_axis = uEye.draw_axis(pnts, img_final_uEye)
+        cv2.imshow("Image: ", img_final_uEye_axis)
+        cv2.waitKey(0)
+
+#-------------------------------------------------------------#
+    f = 30
+    NIT = Calibration(pattern_points)
+    im = cv2.imread("../../data/calibration/nit/move_o.jpg")
+    pxls_pattern_NIT = NIT.get_pxls_homography(im, scale)
+    print pxls_pattern_NIT
+    NIT.calculate_homography(pxls_pattern_NIT)
+
+    #---- Origin -----#
+    files = glob.glob("../../data/calibration/nit/frame*.jpg")
+    pxl_pnts = NIT.get_pxl_origin(files, scale)
+    #---- Orientation -----#
+    files_move = glob.glob("../../data/calibration/nit/move*.jpg")
+    pxl_pnts_origin, pxl_pnts_x, pxl_pnts_y = NIT.get_pxl_orientation(files_move, scale)
+    pxl_TCP, factor, angle_y, angle_x = NIT.calculate_TCP_orientarion(pxl_pnts, pxl_pnts_origin, pxl_pnts_x, pxl_pnts_y, 2, 3)
+
+    angle = NIT.calculate_angle_TCP(pxl_pnts_origin, pxl_pnts_x, pxls_pattern_NIT)
+    print "Angle TCP NIT: ", angle
+    NIT.calculate_frame(pxl_TCP, angle)
+
+    hom_final_NIT = NIT.calculate_hom_final(im, pnts, corners, pnts_final)
+    filename = '../../config/NIT_config.yaml'
+    NIT.write_config_file(filename)
+
+    files = glob.glob("../../data/calibration/nit/frame*.jpg")
+    for f in sorted(files):
+        im_NIT = cv2.imread(f)
+        img_final_NIT = NIT.rep.define_camera(im_NIT, hom_final_NIT)
+        img_final_NIT_axis = NIT.draw_axis(pnts, img_final_NIT)
+        cv2.imshow("Image: ", img_final_NIT)
+        cv2.waitKey(0)

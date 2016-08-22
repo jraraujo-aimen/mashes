@@ -5,12 +5,12 @@ import cv2
 import glob
 import numpy as np
 
-from measures.projection import Projection
-import matplotlib.pyplot as plt
 from scipy import linalg
 from scipy import stats
 
-#-----------------------------additional classes------------------------------#
+import matplotlib.pyplot as plt
+
+from measures.projection import Projection
 
 
 class RingBuffer():
@@ -55,12 +55,10 @@ class Velocity():
         self.vx = float(row[2])
         self.vy = float(row[3])
         self.vz = float(row[4])
-#-----------------------------additional classes------------------------------#
 
 
-class CoolRate_adv():
+class CoolRate():
     def __init__(self):
-        #------------configurable variables------------#
         self.size_sensor = 32
         self.init_points = 2
         self.num_points = 10
@@ -306,7 +304,6 @@ class CoolRate_adv():
                 image[index] = 0
             else:
                 image[index] = intensity
-
         value = np.amax(image)
         i = np.unravel_index(np.argmax(image), image.shape)
         print value, i
@@ -445,12 +442,10 @@ class CoolRate_adv():
         #         #frame_0: position_0
             pxl_pos_1 = self.p_NIT.transform(self.p_NIT.hom, pos_1)
             intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
-
             # if intensity_0 == -1 or intensity_1 == -1:
             #     gradient = np.nan
             # else:
             #     gradient = (intensity_1 - intensity_0)/self.dt
-
             return pos_1, pxl_pos_1, intensity_1
         else:
             return None, None, None
@@ -462,8 +457,9 @@ class CoolRate_adv():
         else:
             return None
 
+
 if __name__ == '__main__':
-    coolrate = CoolRate_adv()
+    coolrate = CoolRate()
 
     vel_csv = "../../../mashes_calibration/data/coolrate/velocity/velocity.csv"
     vel = os.path.realpath(os.path.join(os.getcwd(), vel_csv))
