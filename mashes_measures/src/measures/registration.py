@@ -17,6 +17,8 @@ BLACK = (0, 0, 0)
 GRAY = (128, 128, 128)
 WHITE = (255, 255, 255)
 
+SIZE = 500
+
 
 class Registration():
     def __init__(self):
@@ -32,7 +34,7 @@ class Registration():
 
         self.hom = Homography()
         points = np.float32([[-2.5, -2.5], [2.5, -2.5], [-2.5, 2.5], [2.5, 2.5]])
-        pixels = np.float32([[0, 0], [0, 500], [500, 0], [500, 500]])
+        pixels = np.float32([[0, 0], [0, SIZE], [SIZE, 0], [SIZE, SIZE]])
         self.hom.calculate(points, pixels)
 
     def draw_points(self, image, pnts):
@@ -57,23 +59,17 @@ class Registration():
 
     def draw_ellipse(self, image, ellipse, color=MAROON):
         center, axis, angle = ellipse
-        axis = (float(axis[0]) / 2, float(axis[1]) / 2)
         angle = np.rad2deg(angle)
-        print center, axis, angle
         box = np.float32(cv2.cv.BoxPoints((center, axis, angle)))
-        print box, box.dtype
-        print self.hom.project(box)
         center, axis, angle = cv2.minAreaRect(self.hom.project(box))
-        center = (int(center[0]), int(center[1]))
-        axis = (int(round(axis[0])), int(round(axis[1])))
-        print center, axis, angle
+        center = (int(round(center[0])), int(round(center[1])))
+        axis = (int(round(axis[0]/2)), int(round(axis[1]/2)))
         cv2.ellipse(image, center, axis, angle, 0, 360, color, 2)
         cv2.circle(image, center, 3, color, -1)
         return image
 
     def draw_arrow(self, image, speed, vel, color=YELLOW):
         if speed > 0:
-            print speed, vel
             if speed <= 10:
                 scale = 0.1
             else:
@@ -94,7 +90,7 @@ class Registration():
         return image
 
     def paint_images(self):
-        image = np.zeros((500, 500, 3), dtype=np.uint8)
+        image = np.zeros((SIZE, SIZE, 3), dtype=np.uint8)
         if self.img_camera is not None:
             img_camera = cv2.cvtColor(self.img_camera, cv2.COLOR_GRAY2BGR)
             img_camera = self.p_camera.project_image(img_camera)
@@ -142,7 +138,7 @@ if __name__ == '__main__':
     plt.show()
 
     registration.img_tachyon = cv2.cvtColor(im_NIT, cv2.COLOR_BGR2RGB)
-    registration.img_camera = im_uEye[:, :, 0]
+    registration.img_camera = cv2.cvtColor(im_uEye, cv2.COLOR_BGR2GRAY)
     registration.speed = 10
     registration.velocity = (10, -10, 0)
     registration.ellipse = (0, 0), (3, 1), np.pi/4
