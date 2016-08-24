@@ -26,25 +26,28 @@ class NdSupervisor():
         while not rospy.is_shutdown():
             self.cb_status()
             r.sleep()
-        # rospy.spin()
 
     def cb_status(self):
         #stamp = rospy.Time.now()
         self.pub_status.publish(self.msg_status)
 
     def cb_geometry(self, msg_geometry):
+        power = 0
         laser_on = False
         if msg_geometry.minor_axis > 0.5:
             laser_on = True
+            power = rospy.get_param('/process/power')
         self.msg_status.laser_on = laser_on
-        # self.cb_status()
+        self.msg_status.power = power
 
     def cb_velocity(self, msg_velocity):
+        speed = 0
         running = False
         if msg_velocity.speed > 0.0005:
             running = True
+            speed = 1000 * msg_velocity.speed
         self.msg_status.running = running
-        # self.cb_status()
+        self.msg_status.speed = speed
 
 
 if __name__ == '__main__':

@@ -1,7 +1,9 @@
-import numpy as np
-from homography import Homography
 import cv2
+import numpy as np
 from scipy import linalg
+
+from homography import Homography
+
 BLUE = [255, 0, 0]
 RED = [0, 255, 0]
 GREEN = [0, 0, 255]
@@ -9,7 +11,7 @@ GREEN = [0, 0, 255]
 
 class Representation():
     def __init__(self):
-        print " "
+        pass
 
     def transform(self, hom, pnts):
         pnts = np.float32([
@@ -35,29 +37,19 @@ class Representation():
 if __name__ == '__main__':
 
     pnts_pattern = np.float32([[0, 0], [1.1, 0], [0, 1.1], [1.1, 1.1]])
+    pnts_image = np.float32([[579.3, 118.0], [572.7, 276.0], [425.3, 108.7], [412.7, 262.0]])
+
     homography = Homography(pnts_pattern)
-
-    pnts = np.float32([[0, 0],
-                       [1, 0],
-                       [0, 1]])
-
-    corners = np.float32([[-2.5, -2.5],
-                          [2.5, -2.5],
-                          [-2.5, 2.5],
-                          [2.5, 2.5]])
-
-    pnts_final = np.float32([[0, 0],
-                             [500, 0],
-                             [0, 500],
-                             [500, 500]])
+    homography_uEye = homography.calculate(pnts_image)
 
     im_ueye = cv2.imread('../../data/calibration/vis/frame07.jpg')
+
     r1 = Representation()
 
-    #pxls_pattern_uEye = np.float32([[425.3, 108.7], [579.3, 118.0], [412.7, 262.0], [572.7, 276.0]])
-    pxls_pattern_uEye = np.float32([[579.3, 118.0], [572.7, 276.0], [425.3, 108.7], [412.7, 262.0]])
+    pnts = np.float32([[0, 0], [1, 0], [0, 1]])
+    corners = np.float32([[-2.5, -2.5], [2.5, -2.5], [-2.5, 2.5], [2.5, 2.5]])
+    pnts_final = np.float32([[0, 0], [500, 0], [0, 500], [500, 500]])
 
-    homography_uEye = homography.calculate(pxls_pattern_uEye)
     print "uEye Homography: "
     print homography_uEye
     inv_homography_uEye = linalg.inv(homography_uEye)
@@ -71,10 +63,6 @@ if __name__ == '__main__':
                              [np.sin(a),  np.cos(a), pnts_TCP_uEye[1]],
                              [0, 0, 1]])
     inv_Frame_uEye = linalg.inv(Frame_uEye)
-
-
-
-
 
     pxls_uEye_camera = r1.transform(inv_homography_uEye, pnts)
     print "Pixels uEye", pxls_uEye_camera
@@ -104,7 +92,6 @@ if __name__ == '__main__':
     img_final_uEye = r1.define_camera(im_ueye, hom_final_uEye)
     #cv2.imshow("Image uEye final", img_final_uEye)
 
-
 #------------------Visualize Axis pattern
     pnts_axis_pattern = pnts
     pxls_axis_pattern = r1.transform(inv_homography_uEye, pnts_axis_pattern)
@@ -120,6 +107,7 @@ if __name__ == '__main__':
     print 'Points axis TCP final', pnt_axis_TCP_final
     img_final_axis_uEye = r1.draw_axis_camera(img_pattern_uEye, pnt_axis_TCP_final)
     cv2.imshow("Image uEye axis TCP", img_final_axis_uEye)
+
 #------------------
 #------------------
 #------------------
@@ -194,9 +182,6 @@ if __name__ == '__main__':
     img_final_axis_NIT = r2.draw_axis_camera(img_pattern_NIT, pnt_axis_TCP_final)
     cv2.imshow("Image NIT axis TCP", img_final_axis_NIT)
 
-
-#------------------
-#------------------
 #------------------
 #------------------
     img_final = cv2.addWeighted(img_final_axis_uEye, 0.2, img_final_axis_NIT, 0.8, 0)

@@ -1,2 +1,4 @@
-bool laser_on
 bool running
+bool laser_on
+float32 speed
+float32 power

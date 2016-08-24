@@ -1,6 +1,4 @@
-#!/usr/bin/env python
 import numpy as np
-import math
 
 
 class Angle():
@@ -13,11 +11,12 @@ class Angle():
 
     def calculate_angle(self, vd1, vd2):
         den = abs(vd1[0]*vd2[0]+vd1[1]*vd2[1])
-        num1 = math.sqrt(vd1[0]**2+vd1[1]**2)
-        num2 = math.sqrt(vd2[0]**2+vd2[1]**2)
+        num1 = np.sqrt(vd1[0]**2+vd1[1]**2)
+        num2 = np.sqrt(vd2[0]**2+vd2[1]**2)
         cos_angle = den/(num1*num2)
-        angle = math.degrees(math.acos(cos_angle))
+        angle = np.rad2deg(np.arccos(cos_angle))
         return angle
+
 
 if __name__ == '__main__':
     a = Angle()

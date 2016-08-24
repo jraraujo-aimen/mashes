@@ -43,5 +43,4 @@ $f_c = {1 \over {2 \cdot \pi \cdot RC}}$
 
 The smoothing factor is calculated from the cut-off frequency.
 
-
 [1] [https://en.wikipedia.org/wiki/Low-pass_filter](https://en.wikipedia.org/wiki/Low-pass_filter)

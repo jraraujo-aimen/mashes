@@ -40,8 +40,7 @@ class NdGeometry():
             if msg_image.encoding == 'rgb8':
                 frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
             center, axis, angle = self.geometry.find_geometry(frame)
-            if axis[1] > 0:
-                center, axis, angle = self.projection.transform_ellipse(center, axis, angle)
+            center, axis, angle = self.projection.transform_ellipse(center, axis, angle)
             self.msg_geo.header.stamp = stamp
             self.msg_geo.x = center[0]
             self.msg_geo.y = center[1]

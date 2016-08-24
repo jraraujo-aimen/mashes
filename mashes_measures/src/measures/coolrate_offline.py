@@ -3,7 +3,6 @@ import os
 import csv
 import cv2
 import glob
-import math
 import numpy as np
 
 from measures.projection import Projection
@@ -65,7 +64,7 @@ class CoolRate_adv():
         self.size_sensor = 32
         self.init_points = 2
         self.num_points = 10
-        self.num_points_fitted = 5
+        self.num_points_fitted = 4
         self.frame_sample = 48
         self.laser_threshold = 80
         self.rate_gradient = 4
@@ -77,6 +76,11 @@ class CoolRate_adv():
         self.pause_plot = 0.05
         self.pause_image = 100
         self.color = (255, 255, 255)
+
+        self.points_plotted = 0
+        self.num_plotted = 17
+        self.font_size = 20
+        self.line_width = 3
         #----------------------------------------------#
 
         self.start = False
@@ -131,23 +135,19 @@ class CoolRate_adv():
             t_frame = int(os.path.basename(f).split(".")[0])
             t_frames.append(t_frame)
 
-
+        axisNum = 0
         with open(dir_file, 'rb') as csvfile:
 
             fig_0 = plt.figure()
-            fig_0.suptitle('Data and Fitted Function')
-            ax1_0 = fig_0.add_subplot(211)
-            ax1_0.set_title('Data')
-            ax1_0.set_xlabel('point')
-            ax1_0.set_ylabel('value')
-            ax1_0.set_xlim([0, self.num_points-1])
+            # fig_0.suptitle('Data and Fitted Function')
+            ax1_0 = fig_0.add_subplot(111)
+            # ax1_0.set_title('Data')
+            ax1_0.set_xlabel('ms', fontsize=self.font_size)
+            ax1_0.set_ylabel('counts', fontsize=self.font_size)
+            ax1_0.set_xlim([0, self.frame_sample*(self.num_points-1)])
             ax1_0.set_ylim([0, 256])
-            ax2_0 = fig_0.add_subplot(212)
-            ax2_0.set_title('Fitted')
-            ax2_0.set_xlabel('point')
-            ax2_0.set_ylabel('value')
-            ax2_0.set_xlim([0, self.num_points-1])
-            ax2_0.set_ylim([0, 256])
+            ax1_0.tick_params(labelsize=self.font_size)
+
 
             reader = csv.reader(csvfile, delimiter=',')
             row = next(reader)
@@ -181,18 +181,15 @@ class CoolRate_adv():
                                 if self.matrix_intensity[0].stored_data:
                                     self.image_gradient(index, False)
 
+
                             if self.matrix_intensity[0].index == self.matrix_intensity[0].length:
                                 intensity = [self.matrix_intensity[point].data[0] for point in range(self.num_points)]
 
                                 #vvvvviiiiiissssssssssssssssssssssssssssssssss#
                                 img = self.image.copy()
+
                                 self.total_intensity.append(intensity)
-
-                                plt.ion()
                                 x = np.arange(self.num_points).tolist()
-                                ax1_0.plot(x, intensity)
-                                plt.pause(self.pause_plot)
-
                                 x_a = np.array(x)
                                 intensity_f = np.array(intensity[:self.num_points_fitted])
                                 x_f = np.array(np.arange(self.num_points_fitted).tolist())
@@ -201,11 +198,24 @@ class CoolRate_adv():
                                 fit_y = self.model_func(x_a, A, K, self.thr_no_laser)
                                 self.coeff_1.append(A)
                                 self.coeff_2.append(K)
-                                print "Fit y", fit_y
-                                plt.ion()
-                                ax2_0.plot(x, fit_y)
-                                plt.pause(self.pause_plot)
 
+                                colors = ('b', 'g',  'y', 'r', 'm', 'c', 'k')
+                                set_time = [x*self.frame_sample for x in range(self.num_points)]
+
+                                if self.points_plotted == self.num_plotted:
+                                    axisNum += 1
+                                    color = colors[axisNum % len(colors)]
+                                    plt.ion()
+                                    ax1_0.plot(set_time, intensity, color=color, linewidth=self.line_width)
+                                    plt.pause(self.pause_plot)
+
+
+                                    plt.ion()
+                                    ax1_0.plot(set_time, fit_y, '--', color=color, linewidth=self.line_width)
+                                    plt.pause(self.pause_plot)
+                                    self.points_plotted = 0
+                                else:
+                                    self.points_plotted = self.points_plotted + 1
 
 
                                 w, h = img.shape
@@ -218,26 +228,31 @@ class CoolRate_adv():
                                         cv2.circle(img_plus, (int(round(p[0][0])*self.scale_vis), int(round(p[0][1])*self.scale_vis)), 4, self.color, -1)
                                 cv2.imshow("Image: ", img_plus)
                                 cv2.waitKey(self.pause_image)
-                                print "Total t", self.total_t.data
                                 self.t_axis.append(float(self.total_t.data[0])/1000000)
+                                print "Self.dt", self.dt
                                 #vvvvviiiiiissssssssssssssssssssssssssssssssss#
 
 
             x_t = [self.t_axis[t] - self.t_axis[0] for t in range(len(self.t_axis))]
+
+            print self.coeff_2
+            print x_t
             fig_1 = plt.figure()
             fig_1.suptitle('Fitted Function:\n y = A e^(K t) + 0')
 
             ax1 = fig_1.add_subplot(211)
-            ax1.plot(x_t, self.coeff_1)
-            ax1.set_title('A')
-            ax1.set_xlabel('ms')
-            ax1.set_ylabel('value')
+            ax1.plot(x_t, self.coeff_1, linewidth=self.line_width)
+            ax1.set_title('A', fontsize=self.font_size)
+            ax1.set_xlabel('ms', fontsize=self.font_size)
+            ax1.set_ylabel('value', fontsize=self.font_size)
+            ax1.tick_params(labelsize=self.font_size)
             ax1.set_ylim([0, 400])
             ax2 = fig_1.add_subplot(212)
-            ax2.plot(x_t, self.coeff_2)
-            ax2.set_title('K')
-            ax2.set_xlabel('ms')
-            ax2.set_ylabel('value')
+            ax2.plot(x_t, self.coeff_2, linewidth=self.line_width)
+            ax2.set_title('K', fontsize=self.font_size)
+            ax2.set_xlabel('ms', fontsize=self.font_size)
+            ax2.set_ylabel('value', fontsize=self.font_size)
+            ax2.tick_params(labelsize=self.font_size)
             ax2.set_ylim([-1, 0])
 
 
@@ -268,11 +283,8 @@ class CoolRate_adv():
 
             plt.show()
 
-
             while True:
                 plt.pause(self.pause_plot)
-
-
 
     def fit_exp_linear(self, t, y, C=0):
         y = y - C
@@ -425,7 +437,6 @@ class CoolRate_adv():
             gradient = np.nan
         else:
             gradient = intensity_1 - intensity_0
-
 
     def get_next_value(self, vel, intensity_0, pxl_pos_0, pos=np.float32([[0, 0]])):
         pos_0 = np.float32([[pos[0][0], pos[0][1], 0]])

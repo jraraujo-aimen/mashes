@@ -21,25 +21,25 @@ class Geometry():
                 cnt = contours[np.argmax(areas)]
         return cnt
 
-    def find_ellipse(self, contour):
-        ellipse = cv2.fitEllipse(contour)
-        return ellipse
-
-    def find_geometry(self, frame):
-        img_bin = self.binarize(frame)
+    def find_ellipse(self, img_bin):
         cnt = self.find_contour(img_bin)
         axis, angle, center = (0, 0), 0, (0, 0)
         if cnt is not None:
             if len(cnt) > 4:
-                ellipse = self.find_ellipse(cnt)
+                ellipse = cv2.fitEllipse(cnt)
                 (x, y), (h, v), angle = ellipse
                 center = (x, y)
                 if h >= v:
-                    angle = np.deg2rad(angle)
                     axis = (h, v)
+                    angle = np.deg2rad(angle)
                 else:
-                    angle = np.deg2rad(angle-90)
                     axis = (v, h)
+                    angle = np.deg2rad(angle-90)
+        return center, axis, angle
+
+    def find_geometry(self, frame):
+        img_bin = self.binarize(frame)
+        center, axis, angle = self.find_ellipse(img_bin)
         return center, axis, angle
 
     def draw_geometry(self, frame, ellipse):
@@ -52,10 +52,12 @@ class Geometry():
 
 
 if __name__ == '__main__':
-    geometry = Geometry()
+    import matplotlib.pyplot as plt
 
     img = cv2.imread('../../data/frame0000.jpg')
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    geometry = Geometry(127)
     ellipse = geometry.find_geometry(frame)
     print ellipse
 
@@ -64,15 +66,18 @@ if __name__ == '__main__':
     axis = (ellipse[1][0] * 10, ellipse[1][1] * 10)
     angle = ellipse[2]
 
-    frame = geometry.draw_geometry(img, (center, axis, angle))
-    cv2.imshow('Image', frame)
-    cv2.waitKey()
+    frame1 = geometry.draw_geometry(img, (center, axis, angle))
 
     img = cv2.imread('../../data/frame0001.jpg')
     frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     ellipse = geometry.find_geometry(frame)
     print ellipse
 
-    frame = geometry.draw_geometry(img, ellipse)
-    cv2.imshow('Image', frame)
-    cv2.waitKey()
+    frame2 = geometry.draw_geometry(img, ellipse)
+
+    plt.figure()
+    plt.subplot(121)
+    plt.imshow(cv2.cvtColor(frame1, cv2.COLOR_BGR2RGB), interpolation='none')
+    plt.subplot(122)
+    plt.imshow(cv2.cvtColor(frame2, cv2.COLOR_BGR2RGB), interpolation='none')
+    plt.show()
