@@ -40,7 +40,6 @@ class NdVelocity():
             self.msg_velocity.vx = velocity[0]
             self.msg_velocity.vy = velocity[1]
             self.msg_velocity.vz = velocity[2]
-            rospy.loginfo(self.msg_velocity)
             self.velocity_pub.publish(self.msg_velocity)
         except (tf.Exception, tf.LookupException, tf.ConnectivityException,
                 tf.ExtrapolationException):
