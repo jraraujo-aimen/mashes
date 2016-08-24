@@ -16,7 +16,10 @@ class Homography():
         return self.hom
 
     def save(self, filename):
-        pass
+        data = {'hom': self.hom.tolist()}
+        with open(filename, 'w') as f:
+            yaml.dump(data, f)
+        return self.hom
 
     def calculate(self, points, pixels):
         """Calculates the transformation from pixels to real coordinates."""

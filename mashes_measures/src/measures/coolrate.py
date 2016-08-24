@@ -7,7 +7,7 @@ from scipy import stats
 
 import matplotlib.pyplot as plt
 
-from measures.projection import Projection
+from measures.homography import Homography
 
 WHITE = (255, 255, 255)
 FONT_SIZE = 20
@@ -22,10 +22,13 @@ INIT_POINTS = 2
 NUM_POINTS_FITTED = 4
 COLORS = ('b', 'g',  'y', 'r', 'm', 'c', 'k')
 
-FRAME_SAMPLE = 48
+THR_NO_LASER = 40
+LASER_THRESHOLD = 80
 W_PPAL = 0.9
 W_SIDE = 0.015
 W_DIAG = 0.01
+
+FRAME_SAMPLE = 48
 
 
 class RingBuffer():
@@ -58,20 +61,14 @@ class RingBuffer():
 
 class CoolRate():
     def __init__(self):
-        self.laser_threshold = 80
-        self.thr_no_laser = 40
-        self.points_plotted = 0
-        #----------------------------------------------#
+        self.hom = Homography()
+        self.hom.load('../../config/tachyon.yaml')
 
-        self.p_NIT = Projection()
-        self.p_NIT.load_configuration('../../config/tachyon.yaml')
-
-        self.time = None
-        self.dt = None
-        self.ds = None
+        self.stime = None
+        self.ttime = None
 
         self.first = True
-
+        self.points_plotted = 0
         self.frame_1 = np.zeros((SIZE_SENSOR, SIZE_SENSOR, 1), dtype=np.uint8)
 
         self.sizes = list(range(
@@ -114,7 +111,7 @@ class CoolRate():
             reader = csv.reader(csvfile, delimiter=',')
             row = next(reader)
             for row in reader:
-                velocities(self.get_velocity(row))
+                velocities.apppend(self.get_velocity(row))
         return velocities
 
     def load_data(self, dir_file, dir_frame):
@@ -162,8 +159,8 @@ class CoolRate():
                             intensity_f = np.array(intensity[:NUM_POINTS_FITTED])
 
                             # Exponential Fit (Note that we have to provide the y-offset ("C") value!!
-                            A, K = self.fit_exp_linear(x_f, intensity_f, self.thr_no_laser)
-                            fit_y = self.model_func(x_a, A, K, self.thr_no_laser)
+                            A, K = self.fit_exp_linear(x_f, intensity_f, THR_NO_LASER)
+                            fit_y = self.model_func(x_a, A, K, THR_NO_LASER)
                             self.coeff_1.append(A)
                             self.coeff_2.append(K)
 
@@ -186,7 +183,6 @@ class CoolRate():
                             self.show_image(image.copy())
 
                             self.t_axis.append(float(self.total_t.data[0])/1000000)
-                            print "Self.dt", self.dt
                             #vvvvviiiiiissssssssssssssssssssssssssssssssss#
 
         x_t = [self.t_axis[t] - self.t_axis[0] for t in range(len(self.t_axis))]
@@ -266,7 +262,7 @@ class CoolRate():
         value = np.amax(image)
         i = np.unravel_index(np.argmax(image), image.shape)
         print value, i
-        if value > self.laser_threshold:
+        if value > LASER_THRESHOLD:
             print "laser on"
             return i
         else:
@@ -306,7 +302,7 @@ class CoolRate():
                 self.first = False
 
                 pxl_pos_0 = np.float32([[pxl_pos[0], pxl_pos[1]]])
-                pos_0 = self.p_NIT.project(pxl_pos_0)
+                pos_0 = self.hom.project(pxl_pos_0)
                 intensity_0 = self.get_value_pixel(image, pxl_pos_0[0])
 
                 self.matrix_intensity[0].append_data(intensity_0)
@@ -317,7 +313,7 @@ class CoolRate():
 
             if data:
                 pxl_pos_0 = np.float32([[pxl_pos[0], pxl_pos[1]]])
-                pos_0 = self.p_NIT.project(pxl_pos_0)
+                pos_0 = self.hom.project(pxl_pos_0)
                 intensity_0 = self.get_value_pixel(image, pxl_pos_0[0])
 
             self.matrix_intensity[0].append_data(intensity_0)
@@ -356,14 +352,6 @@ class CoolRate():
                 self.matrix_pxl_point[x+1].append_data(np.nan)
                 self.matrix_point[x+1].append_data(np.nan)
 
-    def get_ds(self, time, vel):
-        if self.time is not None:
-            dt = time - self.time
-            self.dt = dt
-            self.ds = vel * dt
-        self.time = time
-        return self.ds
-
     def get_gradient(self, rate):
         intensity_0 = self.matrix_intensity[0].data[0]
         intensity_1 = self.matrix_intensity[rate].data[0]
@@ -375,12 +363,37 @@ class CoolRate():
     def get_next_value(self, ds, intensity_0, pxl_pos_0, pos=np.float32([[0, 0]])):
         pos_0 = np.float32([[pos[0][0], pos[0][1], 0]])
         pos_1 = pos_0 + ds
-        if pos_1 is not None and self.dt < 0.2 * 1000000000:
+        if pos_1 is not None:
             pxl_pos_1 = self.p_NIT.transform(pos_1)
             intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
             return pos_1, pxl_pos_1, intensity_1
         else:
             return None, None, None
+
+    def get_ds(self, time, vel):
+        ds = 0
+        if self.stime is not None:
+            dt = time - self.stime
+            ds = vel * dt
+        self.stime = time
+        return ds
+
+    def get_dt(self, time):
+        dt = 0
+        if self.ttime is not None:
+            dt = time - self.ttime
+        self.ttime = time
+        return dt
+
+    def get_pixel(self, point):
+        return np.round(self.hom.project([point])[0], 0).astype(np.int)
+
+    def get_point(self, pixel):
+        return self.hom.transform([pixel])[0]
+
+    def get_value(self, image, pixel):
+        x, y = pixel
+        return image[y, x]
 
 
 if __name__ == '__main__':
@@ -390,11 +403,52 @@ if __name__ == '__main__':
     data = read_hdf5(filename)
     velocity = calculate_velocity(data['robot'].time, data['robot'].position)
     data['robot'] = append_data(data['robot'], velocity)
-    print data
+
+    robot = data['robot']
+    tachyon = data['tachyon']
+
+    idx = np.arange(0, len(tachyon), FRAME_SAMPLE)
+    times = np.array(tachyon.time[idx])
+    frames = read_frames(tachyon.frame[idx])
+    frames = np.array([cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in frames])
+
+    image = frames[350]
+    r, c = np.unravel_index(np.argmax(image), image.shape)
+    pixel = (c, r)
+
+    maxs = np.array([np.max(frame) for frame in frames])
+    track = np.array([max > LASER_THRESHOLD for max in maxs])
+    times = times[track]
+    frames = frames[track]
 
     coolrate = CoolRate()
+    dt = [coolrate.get_dt(time) for time in times]
+    print 'Delta time', dt
+    #ds = [coolrate.get_ds(robot.time[k], np.array(robot.velocity[k][:2])) for k in range(len(robot))]
+    vel = np.array([0, 0.008]) * 1000
+    ds = [coolrate.get_ds(time, vel) for time in times]
+    print 'Displacement:', ds
 
-    files_NIT = "../../../mashes_calibration/data/coolrate/tachyon/image/*.png"
-    f_NIT = glob.glob(os.path.realpath(os.path.join(os.getcwd(), files_NIT)))
-    coolrate.load_data(
-        "../../../mashes_calibration/data/coolrate/velocity/velocity.csv", f_NIT)
+    #point = (0, 0)
+    point = coolrate.get_point(pixel)
+    pixel = coolrate.get_pixel(point)
+    value = coolrate.get_value(image, pixel)
+    print 'Maximum point, pixel, and value:', point, pixel, value
+
+    point = coolrate.get_point((12, 14))
+
+    curves = []
+    for j in range(10, len(frames)/10*10-10, 10):
+        cooling = []
+        for k in range(10):
+            if k == 0:
+                pnt = point
+            else:
+                pnt = pnt - ds[j+k]
+            cooling.append(coolrate.get_value(frames[j+k], coolrate.get_pixel(pnt)))
+        curves.append(cooling)
+
+    plt.figure()
+    for curve in curves:
+        plt.plot(curve)
+    plt.show()
