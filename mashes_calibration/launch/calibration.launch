@@ -1,0 +1,17 @@
+<launch>
+  <arg name="sim" default="false"/>
+
+  <include file="$(find mashes_workcell)/launch/workcell.launch">
+    <arg name="gui" value="false" />
+    <arg name="sim" value="$(arg sim)" />
+  </include>
+
+  <node name="tachyon_viewer" pkg="mashes_calibration" type="nd_viewer.py">
+    <param name="image" type="str" value="/tachyon/image"/>
+  </node>
+
+  <node name="camera_viewer" pkg="mashes_calibration" type="nd_viewer.py">
+    <param name="image" type="str" value="/camera/image"/>
+  </node>
+
+</launch>

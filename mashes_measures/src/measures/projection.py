@@ -8,9 +8,9 @@ class Projection():
     def __init__(self, config=None, SIZE=500):
         self.hom = Homography()
         self.vis = np.eye(3)
+        self.SIZE = SIZE
         if config is not None:
             self.load_configuration(config)
-        self.SIZE = SIZE
 
     def load_configuration(self, filename):
         hom = self.hom.load(filename)
