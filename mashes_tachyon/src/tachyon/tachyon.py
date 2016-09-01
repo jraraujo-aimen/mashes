@@ -121,7 +121,7 @@ class Tachyon():
         self.bground = None
         self.background = None
         self.process_background = False
-
+        
         self.open()
 
     def open(self):
@@ -189,6 +189,7 @@ class Tachyon():
     def configure(self, filename):
         with open(filename, 'r') as ymlfile:
             cfg = yaml.load(ymlfile)
+        print cfg
         self.set_configuration(cfg['int_time'], cfg['wait_time'],
                                cfg['bias'], cfg['vth_value'], cfg['timeout'])
 
