@@ -8,6 +8,7 @@ from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 
 from mashes_tachyon.msg import MsgCalibrate
+from mashes_tachyon.msg import MsgTemperature
 
 from tachyon.tachyon import Tachyon
 from tachyon.tachyon import LUT_IRON
@@ -18,8 +19,10 @@ class NdTachyon():
         rospy.init_node('tachyon')
 
         image_topic = rospy.get_param('~image', '/tachyon/image')
-
         image_pub = rospy.Publisher(image_topic, Image, queue_size=10)
+        self.pub_temp = rospy.Publisher(
+            '/tachyon/temperature', MsgTemperature, queue_size=10)
+        self.msg_temp = MsgTemperature()
 
         rospy.Subscriber(
             '/tachyon/calibrate', MsgCalibrate, self.cb_calibrate, queue_size=1)
@@ -42,7 +45,9 @@ class NdTachyon():
                 if self.calibrate:
                     tachyon.calibrate(24)
                     self.calibrate = False
+                stamp = rospy.Time.now()
                 frame, header = tachyon.read_frame()
+                header = tachyon.parse_header(header)
                 frame = tachyon.process_frame(frame)
                 if mode == 'rgb8':
                     frame = LUT_IRON[frame]
@@ -51,8 +56,11 @@ class NdTachyon():
                 else:
                     frame = np.uint8(frame >> 2)
                 image_msg = bridge.cv2_to_imgmsg(frame, encoding=mode)
-                image_msg.header.stamp = rospy.Time.now()
+                image_msg.header.stamp = stamp
+                self.msg_temp.header.stamp = stamp
+                self.msg_temp.temperature = header['Temperature'] / 10.0
                 image_pub.publish(image_msg)
+                self.pub_temp.publish(self.msg_temp)
             except CvBridgeError, e:
                 print e
 

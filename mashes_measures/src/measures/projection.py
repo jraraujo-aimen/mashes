@@ -65,9 +65,11 @@ if __name__ == '__main__':
     plt.subplot(121)
     im_NIT = cv2.imread('../../data/nit_focus.jpg')
     plt.imshow(cv2.cvtColor(im_NIT, cv2.COLOR_BGR2RGB), interpolation='none')
+    plt.axis('off')
     plt.subplot(122)
     im_NIT = p_NIT.project_image(im_NIT)
     plt.imshow(cv2.cvtColor(im_NIT, cv2.COLOR_BGR2RGB), interpolation='none')
+    plt.axis('off')
     plt.show()
 
     center, axis, angle = (12, 10), (7, 3), 0

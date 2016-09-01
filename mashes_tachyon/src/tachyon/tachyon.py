@@ -113,15 +113,16 @@ class Tachyon():
     def __init__(self, config='tachyon.yml'):
         self.connected = False
         self.config = config
-        self.open()
 
-        self.size = 32
-        self.model = 1024
+        self.size = None
+        self.model = None
 
         self.frame = None
         self.bground = None
         self.background = None
         self.process_background = False
+
+        self.open()
 
     def open(self):
         """Opens a connection with a TACHYON camera."""
@@ -129,8 +130,10 @@ class Tachyon():
             if _open_camera() > 0:  # Returns the number of cameras
                 self.connected = True
                 self.model = self.configure_bitstream()
-                self.size = int(np.sqrt(self.model))
-                self.configure(self.config)
+                if self.model is not None:
+                    self.configure(self.config)
+                else:
+                    self.close()
             else:
                 print 'ERROR: TACHYON camera not connected.'
         return self.connected
@@ -145,81 +148,80 @@ class Tachyon():
 
     def get_camera_info(self):
         """Returns camera info: description, serial, and manufacturer."""
-        if self.connected:
-            description = ctypes.create_string_buffer(256)
-            serial_number = ctypes.create_string_buffer(256)
-            manufacturer = ctypes.create_string_buffer(256)
-            _get_camera_info(description, serial_number, manufacturer)
-            return description.value, serial_number.value, manufacturer.value
-        else:
-            return None
+        description = ctypes.create_string_buffer(256)
+        serial_number = ctypes.create_string_buffer(256)
+        manufacturer = ctypes.create_string_buffer(256)
+        _get_camera_info(description, serial_number, manufacturer)
+        return description.value, serial_number.value, manufacturer.value
 
     def configure_bitstream(self):
-        model = 1024
         camera_info = self.get_camera_info()
-        print camera_info
-        if camera_info[0] == 'TACHYON 1024 NEW_INFRARED_TECHN':
+        if camera_info[0] == 'TACHYON_1024_microCORE':
+            self.size = 32
+            self.model = 'microcore'
+        elif camera_info[0] == 'TACHYON 1024 NEW_INFRARED_TECHN':
             subprocess.call(['java', '-cp', 'FWLoader.jar',
                              'FWLoader', '-c', '-uf', 'nit_tachyon_32_HS.bit'])
-            model = 1024
+            self.size = 32
+            self.model = 'tachyon1024'
         elif camera_info[0] == 'TACHYON 6400 NEW_INFRARED_TECHN':
-            model = 6400
-        return model
+            self.size = 80
+            self.model = 'tachyon6400'
+        print camera_info, self.model, self.size
+        return self.model
 
     def set_configuration(self, int_time, wait_time, bias, vth_value, timeout):
-        """Puts configuration values of the camera."""
-        if self.connected:
-            self.int_time = _set_integration_time(int_time)
-            self.wait_time = _set_wait_time(wait_time)
-            self.bias = _set_bias(bias)
-            self.vth_value = _set_vth(vth_value)
-            self.timeout = _set_timeout(timeout)
+        if _set_integration_time(int_time) == 0:
+            self.int_time = int_time
+        if _set_wait_time(wait_time) == 0:
+            self.wait_time = wait_time
+        if _set_bias(bias) == 0:
+            self.bias = bias
+        if _set_vth(vth_value) == 0:
+            self.vth_value = vth_value
+        if _set_timeout(timeout) == 0:
+            self.timeout = timeout
+
+    def set_integration_time(self, int_time):
+        self.set_configuration(int(int_time), int(1000-int_time),
+                               self.bias, self.vth_value, self.timeout)
 
     def configure(self, filename):
         with open(filename, 'r') as ymlfile:
             cfg = yaml.load(ymlfile)
-        int_time = float(cfg['configuration']['int_time'])
-        wait_time = float(cfg['configuration']['wait_time'])
-        bias = float(cfg['configuration']['bias'])
-        vth_value = int(cfg['configuration']['vth_value'])
-        timeout = int(cfg['configuration']['timeout'])
-        self.set_configuration(int_time, wait_time, bias, vth_value, timeout)
+        self.set_configuration(cfg['int_time'], cfg['wait_time'],
+                               cfg['bias'], cfg['vth_value'], cfg['timeout'])
 
     def calibrate(self, target=100, auto_off=1):
         """Performs an offset calibration for dark current correction."""
-        if self.connected:
-            for k in range(4500):
-                image, header = self.read_frame()
-                if k == 100:
-                    _close_shutter()
-                elif k == 600:
-                    _calibrate(target, auto_off)
-                elif k == 2600:
-                    _stop_calibration()
-                elif k > 2700 and k < 3900:
-                    self.update_background(image)
-                elif k == 3900:
-                    _open_shutter()
+        for k in range(3000):
+            image, header = self.read_frame()
+            if k == 0:
+                _close_shutter()
+            elif k == 550:
+                _calibrate(target, auto_off)
+            elif k == 2000:
+                _stop_calibration()
+            elif k > 2050 and k < 2500:
+                self.update_background(image)
+            elif k == 2500:
+                _open_shutter()
 
     def start_calibration(self, target=100, auto_off=1):
-        """Starts the calibration process."""
-        if self.connected:
-            _close_shutter()
-            time.sleep(0.5)
-            _calibrate(target, auto_off)
-            time.sleep(0.1)
+        _close_shutter()
+        time.sleep(0.5)
+        _calibrate(target, auto_off)
+        time.sleep(0.1)
 
     def stop_calibration(self):
-        """Stops the calibration process."""
-        if self.connected:
-            _stop_calibration()
-            time.sleep(0.1)
-            self.process_background = True
-            time.sleep(1)
-            self.process_background = False
-            time.sleep(0.1)
-            _open_shutter()
-            time.sleep(0.5)
+        _stop_calibration()
+        time.sleep(0.1)
+        self.process_background = True
+        time.sleep(1)
+        self.process_background = False
+        time.sleep(0.1)
+        _open_shutter()
+        time.sleep(0.5)
 
     def connect(self):
         if self.connected:
@@ -253,67 +255,86 @@ class Tachyon():
 
     def read_frame(self):
         header = np.zeros(64, dtype=np.uint8)
-        image = np.zeros(self.model, dtype=np.int16)
+        image = np.zeros(self.size * self.size, dtype=np.int16)
         i = _read_frame(header, image)
         if i < 0:
             if i == -116:
                 print 'ERROR: (Timeout) Waiting for images.'
             return None
         else:
-            return image.reshape(self.size, self.size), header
+            return np.uint16(image.reshape(self.size, self.size)), header
 
     def parse_header(self, header):
-        print header.view(dtype=np.dtype([('Header_ID', '<u4'),
-                                          ('Frame_counter', 'a4'),
-                                          ('Microseconds_counter_high', '<u4'),
-                                          ('Microseconds_counter_low', '<u4'),
-                                          ('Buffer_status', '<i4'),
-                                          ('Reserved', '<i4'),
-                                          ('Status', '<i4'),
-                                          ('Bias_status', '<i4'),
-                                          ('REGS', 'a32')]))
-        print "Internal frame counter", struct.unpack('I', struct.pack(
-            'BBBB', header[6], header[7], header[4], header[5]))
+        if self.model == 'microcore':
+            # uCORE
+            header_type = np.dtype([('Header_ID', '<u4'),
+                                    ('Frame_counter', 'a4'),
+                                    ('Not_used0', '<u4'),
+                                    ('Miliseconds_counter', '<u4'),
+                                    ('Buffer_status', 'a4'),
+                                    ('Last_command', 'a4'),
+                                    ('Integration_time', '<u2'),
+                                    ('Wait_time', '<u2'),
+                                    ('Shutter_status', '<u2'),
+                                    ('Bias_status', '<u2'),
+                                    ('Reserved', 'a8'),
+                                    ('Calibration_status', '<u2'),
+                                    ('Temperature', '<u2'),
+                                    ('Not_used1', 'a20')])
+        else:
+            # CORE
+            header_type = np.dtype([('Header_ID', '<u4'),
+                                    ('Frame_counter', 'a4'),
+                                    ('Microseconds_counter_high', '<u4'),
+                                    ('Microseconds_counter_low', '<u4'),
+                                    ('Buffer_status', 'a4'),
+                                    ('Reserved', 'a4'),
+                                    ('Status', 'a4'),
+                                    ('Bias_status', 'a4'),
+                                    ('REGS', 'a32')])
+        parsed_header = header.view(dtype=header_type)[0]
+        parsed_header['Frame_counter'] = struct.unpack('I', struct.pack(
+            'BBBB', header[6], header[7], header[4], header[5]))[0]
+        return parsed_header
 
     def update_background(self, frame):
         """dst = (1 - 0.05) * dst + 0.05 * src"""
         if self.bground is None:
             self.bground = np.zeros(frame.shape, dtype=np.float32)
         cv2.accumulateWeighted(np.float32(frame), self.bground, 0.02)
-        self.background = np.int16(self.bground)
+        self.background = np.uint16(self.bground)
 
     def process_frame(self, frame):
         if self.background is None:
-            self.background = np.zeros(frame.shape, dtype=np.int16)
+            self.background = np.zeros(frame.shape, dtype=np.uint16)
         if self.frame is not None:
             mframe = (frame + self.frame) >> 1
         else:
             mframe = frame
         self.frame = frame
-        frame = mframe
-        mean = int(cv2.mean(self.background)[0])
-        frame = cv2.subtract(frame, self.background - mean)
-        frame[frame < 0] = 0
-        frame = cv2.subtract(np.uint16(frame), mean)
-        #frame = cv2.subtract(np.uint16(frame), np.uint16(self.background))
-        return np.int16(frame)
+        return cv2.subtract(mframe, self.background)
 
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-    tachyon = Tachyon()
+    np.set_printoptions(formatter={'int': hex})
+
+    tachyon = Tachyon(config='../../config/tachyon.yml')
+    #tachyon.set_integration_time(200)
+    print tachyon.int_time, tachyon.wait_time
     tachyon.connect()
 
-    tachyon.calibrate(24)
-
-    for k in range(5000):
+    tachyon.calibrate(32)
+    for k in range(2500):
         image, header = tachyon.read_frame()
         image = tachyon.process_frame(image)
+        print tachyon.parse_header(header)#['Temperature'],
     tachyon.disconnect()
 
-    print image
-    print tachyon.background
+    print tachyon.parse_header(header)
+
+    print 'I', np.mean(image), 'B', np.mean(tachyon.background)
 
     plt.figure()
     plt.subplot(121)

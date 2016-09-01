@@ -118,12 +118,21 @@ if __name__ == '__main__':
     im_final = registration.paint_images()
     im_final = registration.draw_axis(im_final)
 
-    im_NIT = cv2.imread('../../data/nit_focus.jpg')
-    im_uEye = cv2.imread('../../data/nir_focus.jpg')
+    im_NIT = cv2.imread('../../data/nit_pattern.png')
+    im_uEye = cv2.imread('../../data/nir_pattern.png')
 
     # center, axis, angle = (12, 12), (7, 3), 0
     # center, axis, angle = p_NIT.transform_ellipse(center, axis, angle)
     # im_final = registration.draw_ellipse(im_final, (center, axis, angle))
+
+    plt.figure()
+    plt.subplot(121)
+    plt.imshow(cv2.cvtColor(im_NIT, cv2.COLOR_BGR2RGB), interpolation='none')
+    plt.axis('off')
+    plt.subplot(122)
+    plt.imshow(cv2.cvtColor(im_uEye, cv2.COLOR_BGR2RGB), interpolation='none')
+    plt.axis('off')
+    plt.show()
 
     im_pNIT = registration.p_tachyon.project_image(im_NIT)
     im_pNIT = registration.draw_ellipse(im_pNIT, ((0, 0), (5, 5), np.pi/2))
@@ -133,8 +142,10 @@ if __name__ == '__main__':
     plt.figure()
     plt.subplot(121)
     plt.imshow(cv2.cvtColor(im_pNIT, cv2.COLOR_BGR2RGB), interpolation='none')
+    plt.axis('off')
     plt.subplot(122)
     plt.imshow(cv2.cvtColor(im_puEye, cv2.COLOR_BGR2RGB), interpolation='none')
+    plt.axis('off')
     plt.show()
 
     registration.img_tachyon = cv2.cvtColor(im_NIT, cv2.COLOR_BGR2RGB)
