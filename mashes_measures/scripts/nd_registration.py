@@ -48,14 +48,14 @@ class NdRegistration():
             self.stamp = msg_image.header.stamp
             self.registration.img_tachyon = self.bridge.imgmsg_to_cv2(msg_image)
         except CvBridgeError, e:
-            print e
+            rospy.loginfo("CvBridge Exception")
 
     def cb_image_camera(self, msg_image):
         try:
             self.stamp1 = msg_image.header.stamp
             self.registration.img_camera = self.bridge.imgmsg_to_cv2(msg_image)
         except CvBridgeError, e:
-            print e
+            rospy.loginfo("CvBridge Exception")
 
     def cb_geometry_tachyon(self, msg_geometry):
         self.registration.ellipse = (

@@ -39,7 +39,6 @@ class NdTachyon():
         tachyon.connect()
 
         self.calibrate = True
-
         while not rospy.is_shutdown():
             try:
                 if self.calibrate:
@@ -62,7 +61,7 @@ class NdTachyon():
                 image_pub.publish(image_msg)
                 self.pub_temp.publish(self.msg_temp)
             except CvBridgeError, e:
-                print e
+                rospy.loginfo("CvBridge Exception")
 
         tachyon.disconnect()
         tachyon.close()

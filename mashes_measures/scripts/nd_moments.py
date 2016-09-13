@@ -50,7 +50,7 @@ class NdMoments():
             self.msg_geo.orientation = angle
             self.pub_geo.publish(self.msg_geo)
         except CvBridgeError, e:
-            print e
+            rospy.loginfo("CvBridge Exception")
 
 
 if __name__ == '__main__':
