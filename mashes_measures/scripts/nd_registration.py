@@ -2,6 +2,7 @@
 import os
 import rospy
 import rospkg
+import numpy as np
 
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
@@ -53,7 +54,9 @@ class NdRegistration():
     def cb_image_camera(self, msg_image):
         try:
             self.stamp1 = msg_image.header.stamp
-            self.registration.img_camera = self.bridge.imgmsg_to_cv2(msg_image)
+            image = self.bridge.imgmsg_to_cv2(msg_image)
+            if msg_image.encoding == 'mono16':
+                self.registration.img_camera = np.uint8(image>>4)
         except CvBridgeError, e:
             rospy.loginfo("CvBridge Exception")
 

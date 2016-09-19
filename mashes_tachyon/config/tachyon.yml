@@ -1,5 +1,5 @@
-int_time: 300.0
-wait_time: 700.0
+int_time: 500.0
+wait_time: 500.0
 bias: 1
 vth_value: 256
 timeout: 1000
