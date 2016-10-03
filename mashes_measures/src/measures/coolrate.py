@@ -1,13 +1,11 @@
-import os
-import csv
+#!/usr/bin/env python
 import cv2
 import numpy as np
 
+from measures.projection import Homography
+import matplotlib.pyplot as plt
 from scipy import stats
 
-import matplotlib.pyplot as plt
-
-from measures.homography import Homography
 
 WHITE = (255, 255, 255)
 FONT_SIZE = 20
@@ -19,16 +17,16 @@ SIZE_SENSOR = 32
 NUM_PLOTTED = 17
 NUM_POINTS = 10
 INIT_POINTS = 2
-NUM_POINTS_FITTED = 4
+NUM_POINTS_FITTED = 7
+
 COLORS = ('b', 'g',  'y', 'r', 'm', 'c', 'k')
 
 THR_NO_LASER = 40
-LASER_THRESHOLD = 80
+LASER_THRESHOLD = 400
 W_PPAL = 0.9
 W_SIDE = 0.015
 W_DIAG = 0.01
-
-FRAME_SAMPLE = 48
+FRAME_SAMPLE = 46
 
 
 class RingBuffer():
@@ -59,17 +57,34 @@ class RingBuffer():
         self.append_data(np.nan)
 
 
+#-----------------------------additional classes------------------------------#
+
 class CoolRate():
     def __init__(self):
-        self.hom = Homography()
-        self.hom.load('../../config/tachyon.yaml')
 
-        self.stime = None
-        self.ttime = None
-
-        self.first = True
         self.points_plotted = 0
+
+        self.start = False
+        self.laser_on = False
+
+        self.hom = Homography()
+        self.hom.load('../../../mashes_calibration/config/tachyon_NO.yaml')
+
+        self.max_value = []
+        self.max_i = []
+        self.min_value = []
+        self.min_i = []
+
+        self.time = None
+        self.dt = None
+        self.ds = None
+
+        self.first = True    # ok
+        self.counter = 0
+
+        self.frame_0 = np.zeros((SIZE_SENSOR, SIZE_SENSOR, 1), dtype=np.uint8)
         self.frame_1 = np.zeros((SIZE_SENSOR, SIZE_SENSOR, 1), dtype=np.uint8)
+        self.image = np.zeros((SIZE_SENSOR, SIZE_SENSOR, 1), dtype=np.uint8)
 
         self.sizes = list(range(
             INIT_POINTS + NUM_POINTS, INIT_POINTS, -1))
@@ -79,116 +94,11 @@ class CoolRate():
         self.total_t = RingBuffer(NUM_POINTS)
         self.dt_axis = []
         self.t_axis = []
+        self.total_intensity = []
 
         self.coeff_1 = []
         self.coeff_2 = []
-
-    def load_image(self, dir_frame):
-        frame = cv2.imread(dir_frame, 1)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        return frame
-
-    def load_frames(self, dir_frame):
-        t_frames, d_frames = [], []
-        for f in sorted(dir_frame):
-            d_frames.append(self.load_image(f))
-            t_frame = int(os.path.basename(f).split(".")[0])
-            t_frames.append(t_frame)
-        return t_frames, d_frames
-
-    def get_velocity(self, row):
-        t_v = int(row[0])
-        speed = float(row[1])
-        vx = float(row[2]) * 1000
-        vy = float(row[3]) * 1000
-        vz = float(row[4]) * 1000
-        vel = np.float32([vx, vy, vz])
-        return t_v, vel
-
-    def load_velocities(self, dir_file):
-        velocities = []
-        with open(dir_file, 'rb') as csvfile:
-            reader = csv.reader(csvfile, delimiter=',')
-            row = next(reader)
-            for row in reader:
-                velocities.apppend(self.get_velocity(row))
-        return velocities
-
-    def load_data(self, dir_file, dir_frame):
-        velocities = self.load_velocities(dir_file)
-        t_frames, d_frames = self.load_frames(dir_frame)
-
-        fig_0 = plt.figure()
-        # fig_0.suptitle('Data and Fitted Function')
-        ax1_0 = fig_0.add_subplot(111)
-        # ax1_0.set_title('Data')
-        ax1_0.set_xlabel('ms', fontsize=FONT_SIZE)
-        ax1_0.set_ylabel('counts', fontsize=FONT_SIZE)
-        ax1_0.set_xlim([0, FRAME_SAMPLE*(NUM_POINTS-1)])
-        ax1_0.set_ylim([0, 256])
-        ax1_0.tick_params(labelsize=FONT_SIZE)
-
-        counter = 0
-        axisNum = 0
-        i_prev = 0
-        i_frame = 0
-        for t, vel in velocities:
-            ds = self.get_ds(t, vel)
-            i_prev = i_frame
-            i_frame = np.argmin(np.array([abs(x - t) for x in t_frames]))
-            if i_frame > i_prev:
-                for i in range(i_prev, i_frame):
-                    counter = counter + 1
-                    if counter == FRAME_SAMPLE:
-                        counter = 0
-                        t = t_frames[i]
-                        image = d_frames[i]
-                        index = self.get_maxvalue(image)
-                        if index is not None:
-                            self.image_gradient(image, ds, index)
-                        else:
-                            if self.matrix_intensity[0].stored_data:
-                                self.image_gradient(image, ds, index, False)
-
-                        if self.matrix_intensity[0].index == self.matrix_intensity[0].length:
-                            intensity = [self.matrix_intensity[point].data[0] for point in range(NUM_POINTS)]
-
-                            #vvvvviiiiiissssssssssssssssssssssssssssssssss#
-                            x_a = np.arange(NUM_POINTS)
-                            x_f = np.arange(NUM_POINTS_FITTED)
-                            intensity_f = np.array(intensity[:NUM_POINTS_FITTED])
-
-                            # Exponential Fit (Note that we have to provide the y-offset ("C") value!!
-                            A, K = self.fit_exp_linear(x_f, intensity_f, THR_NO_LASER)
-                            fit_y = self.model_func(x_a, A, K, THR_NO_LASER)
-                            self.coeff_1.append(A)
-                            self.coeff_2.append(K)
-
-                            set_time = [x*FRAME_SAMPLE for x in range(NUM_POINTS)]
-                            if self.points_plotted == NUM_PLOTTED:
-                                axisNum += 1
-
-                                color = COLORS[axisNum % len(COLORS)]
-                                plt.ion()
-                                ax1_0.plot(set_time, intensity, color=color, linewidth=LINE_WIDTH)
-                                plt.pause(PAUSE_PLOT)
-                                plt.ion()
-                                ax1_0.plot(set_time, fit_y, '--', color=color, linewidth=LINE_WIDTH)
-                                plt.pause(PAUSE_PLOT)
-
-                                self.points_plotted = 0
-                            else:
-                                self.points_plotted = self.points_plotted + 1
-
-                            self.show_image(image.copy())
-
-                            self.t_axis.append(float(self.total_t.data[0])/1000000)
-                            #vvvvviiiiiissssssssssssssssssssssssssssssssss#
-
-        x_t = [self.t_axis[t] - self.t_axis[0] for t in range(len(self.t_axis))]
-
-        self.plot_fitted_data(x_t)
-        self.print_stats()
+        self.coeff_3 = []
 
     def fit_exp_linear(self, t, y, C=0):
         y = y - C
@@ -200,20 +110,169 @@ class CoolRate():
     def model_func(self, t, A, K, C):
         return A * np.exp(K * t) + C
 
-    def show_image(self, img):
-        w, h = img.shape
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
-        img_rgb = cv2.applyColorMap(img_rgb, cv2.COLORMAP_JET)
-        img_plus = cv2.resize(img_rgb, (w*SCALE_VIS, h*SCALE_VIS), interpolation=cv2.INTER_LINEAR)
-        pxl = [self.matrix_pxl_point[t].data[0] for t in range(NUM_POINTS)]
-        for p in pxl:
-            if not np.isnan(p).any():
-                cv2.circle(img_plus, (int(round(p[0][0])*SCALE_VIS), int(round(p[0][1])*SCALE_VIS)), 4, WHITE, -1)
-        cv2.imshow("Image: ", img_plus)
-        cv2.waitKey(PAUSE_IMAGE)
+    def get_maxvalue(self, frame, rng=3):
+        image = np.zeros((SIZE_SENSOR, SIZE_SENSOR), dtype=np.uint16)
+        pxls = [np.float32([v, u]) for v in range(0, SIZE_SENSOR) for u in range(0, SIZE_SENSOR)]
+        for pxl in pxls:
+            index = pxl[0], pxl[1]
+            intensity = self.get_value_pixel(frame, pxl)
+            if intensity == -1:
+                image[index] = 0
+            else:
+                image[index] = intensity
+
+        value = np.amax(image)
+        i = np.unravel_index(np.argmax(image), image.shape)
+        print value, i
+        if value > LASER_THRESHOLD:
+            print "laser on"
+            return i
+        else:
+            return None
+
+    def get_value_pixel(self, frame, pxl, rng=3):
+        intensity = -1
+        limits = (rng - 1)/2
+        p_0 = round(pxl[0])
+        p_1 = round(pxl[1])
+        if (((p_0-limits) < 0) or ((p_0+limits) > (SIZE_SENSOR-1))
+                or ((p_1-limits) < 0) or ((p_1+limits) > (SIZE_SENSOR-1))):
+            return intensity
+        else:
+            intensity = 0
+            if rng == 3:
+                for v in range(-limits, limits+1):
+                    for u in range(-limits, limits+1):
+                        index_v = pxl[0] + v
+                        index_u = pxl[1] + u
+                        if u == 0 and v == 0:
+                            intensity = intensity + frame[index_v, index_u]*W_PPAL
+                        elif u == 0 or v == 0:
+                            intensity = intensity + frame[index_v, index_u]*W_SIDE
+                        else:
+                            intensity = intensity + frame[index_v, index_u]*W_DIAG
+            else:
+                for v in range(-limits, limits+1):
+                    for u in range(-limits, limits+1):
+                        index_v = p_0 + v
+                        index_u = p_1 + u
+                        intensity = intensity + frame[index_v, index_u]
+                intensity = intensity/(rng*rng)
+            return intensity
+
+    def image_gradient(self, robot, index_robot, frame, pxl_pos, time, data=True):
+        velocity = robot['velocity']
+        if self.first:
+            if data:
+                self.first = False
+                vel = velocity.iloc[index_robot]
+                self.get_ds(time, vel)
+                self.frame_0 = frame
+
+                pxl_pos_0 = np.float32([[pxl_pos[0], pxl_pos[1]]])
+                pos_0 = self.hom.transform(pxl_pos_0)
+                intensity_0 = self.get_value_pixel(self.frame_0, pxl_pos_0[0])
+
+                self.matrix_intensity[0].append_data(intensity_0)
+                self.matrix_pxl_point[0].append_data(pxl_pos_0)
+                self.matrix_point[0].append_data(pos_0)
+        else:
+            vel = velocity.iloc[index_robot]
+            self.get_ds(time, vel)
+            self.frame_1 = self.frame_0
+            self.frame_0 = frame
+
+            if data:
+                pxl_pos_0 = np.float32([[pxl_pos[0], pxl_pos[1]]])
+                print "pxl_pos_0", pxl_pos_0
+                pos_0 = self.hom.transform(pxl_pos_0)
+                print "pos_0", pos_0
+                intensity_0 = self.get_value_pixel(self.frame_0, pxl_pos_0[0])
+            else:
+                pxl_pos_0 = np.nan
+                pos_0 = np.nan
+                intensity_0 = np.nan
+
+            self.matrix_intensity[0].append_data(intensity_0)
+            self.matrix_pxl_point[0].append_data(pxl_pos_0)
+            self.matrix_point[0].append_data(pos_0)
+
+            if not self.matrix_intensity[0].complete:
+                last_index = self.matrix_point[0].index - 2
+                if last_index < NUM_POINTS-1:
+                    for x, y in zip(range(last_index, -1, -1), range(last_index+1)):
+                        self.get_next_data(x, y)
+                else:
+                    ly_1 = self.matrix_intensity[NUM_POINTS-2].index - 1
+                    for x, y in zip(range(NUM_POINTS-2, -1, -1), range(ly_1, last_index+1)):
+                        self.get_next_data(x, y)
+            else:
+                lx = len(self.matrix_intensity) - 2
+                ly_1 = len(self.matrix_intensity[0].data) - 2
+                ly_2 = len(self.matrix_intensity[-2].data) - 2
+                for x, y in zip(range(lx + 1), range(ly_1, ly_2 - 1, -1)):
+                    self.get_next_data(x, y)
+
+    def get_next_data(self, x, y):
+        intensity_0 = self.matrix_intensity[x].data[y]
+        pos_0 = np.float32(self.matrix_point[x].data[y])
+        pxl_pos_0 = np.float32(self.matrix_pxl_point[x].data[y])
+        if not np.isnan(intensity_0):
+            pos_1, pxl_pos_1, intensity_1 = self.get_next_value(intensity_0, pxl_pos_0, pos_0)
+            if pos_1 is not None and pxl_pos_1 is not None and intensity_1 is not None:
+                pxl = np.float32([[pxl_pos_1[0][0], pxl_pos_1[0][1]]])
+                self.matrix_intensity[x+1].append_data(intensity_1)
+                self.matrix_pxl_point[x+1].append_data(pxl)
+                self.matrix_point[x+1].append_data(pos_1)
+        else:
+                self.matrix_intensity[x+1].append_data(np.nan)
+                self.matrix_pxl_point[x+1].append_data(np.nan)
+                self.matrix_point[x+1].append_data(np.nan)
+
+    def get_ds(self, time, vel):
+        if self.time is not None:
+            dt = time - self.time
+            self.dt = dt
+            self.total_t.append_data(self.time)
+            self.ds = vel * dt * 1000
+            #m/s
+            #/ 1000000000
+        self.time = time
+
+    def get_next_value(self, intensity_0, pxl_pos_0, pos=np.float32([[0, 0]])):
+        pos_0 = np.float32([[pos[0][0], pos[0][1], 0]])
+        pos_1 = self.get_position(pos_0)
+        if pos_1 is not None and self.dt < 0.2 * 1000000000:
+        #         #frame_0: position_0
+            pxl_pos_1 = self.hom.project(pos_1)
+            intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
+
+            # if intensity_0 == -1 or intensity_1 == -1:
+            #     gradient = np.nan
+            # else:
+            #     gradient = (intensity_1 - intensity_0)/self.dt
+
+            return pos_1, pxl_pos_1, intensity_1
+        else:
+            return None, None, None
+
+    def get_position(self, position):
+        if self.dt is not None:
+            position_1 = position + self.ds
+            return position_1
+        else:
+            return None
+
+    def find_robot(self, robot, times):
+        #indice de los datos del robot con el que se corresponde
+        #cada medida de la tachyon tras aplicar una frecuencia de muestreo
+        times_robot = np.array(robot.time)
+        d_times = [abs(x - times_robot) for x in times]
+        robot_index = [y.tolist().index(min(y)) for y in d_times]
+        return robot_index
 
     def plot_fitted_data(self, x_t):
-        print self.coeff_1, self.coeff_2, x_t
+        # print self.coeff_1, self.coeff_2, x_t
         fig_1 = plt.figure()
         fig_1.suptitle('Fitted Function:\n y = A e^(K t) + 0')
         ax1 = fig_1.add_subplot(211)
@@ -222,14 +281,14 @@ class CoolRate():
         ax1.set_xlabel('ms', fontsize=FONT_SIZE)
         ax1.set_ylabel('value', fontsize=FONT_SIZE)
         ax1.tick_params(labelsize=FONT_SIZE)
-        ax1.set_ylim([0, 400])
+        ax1.set_ylim([0, 2200])
         ax2 = fig_1.add_subplot(212)
         ax2.plot(x_t, self.coeff_2, linewidth=LINE_WIDTH)
         ax2.set_title('K', fontsize=FONT_SIZE)
         ax2.set_xlabel('ms', fontsize=FONT_SIZE)
         ax2.set_ylabel('value', fontsize=FONT_SIZE)
         ax2.tick_params(labelsize=FONT_SIZE)
-        ax2.set_ylim([-1, 0])
+        ax2.set_ylim([-1.2, 0])
         plt.show()
 
     def print_stats(self):
@@ -249,206 +308,120 @@ class CoolRate():
         mode_coeff_2 = stats.mode(self.coeff_2)
         print "Moda (Valor con mayor frecuencia abs):\n A:", mode_coeff_1, "\n K:", mode_coeff_2
 
-    def get_maxvalue(self, image, rng=3):
-        image = np.zeros((SIZE_SENSOR, SIZE_SENSOR), dtype=np.uint16)
-        pxls = [np.float32([u, v]) for u in range(0, SIZE_SENSOR) for v in range(0, SIZE_SENSOR)]
-        for pxl in pxls:
-            index = pxl[0], pxl[1]
-            intensity = self.get_value_pixel(image, pxl)
-            if intensity == -1:
-                image[index] = 0
-            else:
-                image[index] = intensity
-        value = np.amax(image)
-        i = np.unravel_index(np.argmax(image), image.shape)
-        print value, i
-        if value > LASER_THRESHOLD:
-            print "laser on"
-            return i
+    def visualize(self, axisNum,ax1_0, intensity, frame):
+        img = frame.copy()
+        img = LUT_IRON[img]
+        self.total_intensity.append(intensity)
+        x = np.arange(NUM_POINTS).tolist()
+        x_a = np.array(x)
+        intensity_f = np.array(intensity[:NUM_POINTS_FITTED])
+        x_f = np.array(np.arange(NUM_POINTS_FITTED).tolist())
+
+        A, K = coolrate.fit_exp_linear(x_f, intensity_f, THR_NO_LASER)
+        fit_y = coolrate.model_func(x_a, A, K, THR_NO_LASER)
+        coolrate.coeff_1.append(A)
+        coolrate.coeff_2.append(K)
+        set_time = [x*FRAME_SAMPLE for x in range(NUM_POINTS)]
+
+        if self.points_plotted == NUM_PLOTTED:
+            axisNum += 1
+            color = COLORS[axisNum % len(COLORS)]
+            plt.ion()
+            ax1_0.plot(set_time, intensity, color=color, linewidth=LINE_WIDTH)
+            plt.pause(PAUSE_PLOT)
+
+            plt.ion()
+            ax1_0.plot(set_time, fit_y, '--', color=color, linewidth=LINE_WIDTH)
+            plt.pause(PAUSE_PLOT)
+            self.points_plotted = 0
         else:
-            return None
+            self.points_plotted = self.points_plotted + 1
 
-    def get_value_pixel(self, image, pxl, rng=3):
-        intensity = -1
-        limits = (rng - 1)/2
-        p_0, p_1 = round(pxl[0]), round(pxl[1])
-        if (p_0-limits) < 0 or (p_0+limits) > (SIZE_SENSOR-1) or (p_1-limits) < 0 or (p_1+limits) > (SIZE_SENSOR-1):
-            return intensity
-        else:
-            intensity = 0
-            if rng == 3:
-                for i in range(-limits, limits+1):
-                    for j in range(-limits, limits+1):
-                        index_i = pxl[0] + i
-                        index_j = pxl[1] + j
-                        if i == 0 and j == 0:
-                            intensity = intensity + image[index_i, index_j]*W_PPAL
-                        elif i == 0 or j == 0:
-                            intensity = intensity + image[index_i, index_j]*W_SIDE
-                        else:
-                            intensity = intensity + image[index_i, index_j]*W_DIAG
-            else:
-                for i in range(-limits, limits+1):
-                    for j in range(-limits, limits+1):
-                        index_i = p_0 + i
-                        index_j = p_1 + j
-                        intensity = intensity + image[index_i, index_j]
-                intensity = intensity/(rng*rng)
-            return intensity
+        w, h, c = img.shape
+        img_plus = cv2.resize(img, (w*SCALE_VIS, h*SCALE_VIS), interpolation=cv2.INTER_LINEAR)
+        pxl = [coolrate.matrix_pxl_point[t].data[0] for t in range(NUM_POINTS)]
+        for p in pxl:
+            if not np.isnan(p).any():
+                print p
+                cv2.circle(img_plus, (int(round(p[0][1])*SCALE_VIS), int(round(p[0][0])*SCALE_VIS)), 4, WHITE, -1)
+        cv2.imshow("Image: ", img_plus)
+        cv2.waitKey(PAUSE_IMAGE)
+        coolrate.t_axis.append(float(coolrate.total_t.data[0])/1000000)
 
-    def image_gradient(self, image, ds, pxl_pos, data=True):
-        if self.first:
-            if data:
-                self.first = False
+        return axisNum
 
-                pxl_pos_0 = np.float32([[pxl_pos[0], pxl_pos[1]]])
-                pos_0 = self.hom.project(pxl_pos_0)
-                intensity_0 = self.get_value_pixel(image, pxl_pos_0[0])
+    def define_graphs(self):
+        #inicializalizo la figura donde se van a visualizar las graficas
+        fig_0 = plt.figure()
+        fig_0.suptitle('Data and Fitted Function')
+        ax1_0 = fig_0.add_subplot(111)
+        ax1_0.set_xlabel('ms', fontsize=FONT_SIZE)
+        ax1_0.set_ylabel('counts', fontsize=FONT_SIZE)
+        ax1_0.set_xlim([0, FRAME_SAMPLE*(NUM_POINTS-1)])
+        ax1_0.set_ylim([0, 1024])
+        ax1_0.tick_params(labelsize=FONT_SIZE)
+        return ax1_0
 
-                self.matrix_intensity[0].append_data(intensity_0)
-                self.matrix_pxl_point[0].append_data(pxl_pos_0)
-                self.matrix_point[0].append_data(pos_0)
-        else:
-            self.frame_1 = image
-
-            if data:
-                pxl_pos_0 = np.float32([[pxl_pos[0], pxl_pos[1]]])
-                pos_0 = self.hom.project(pxl_pos_0)
-                intensity_0 = self.get_value_pixel(image, pxl_pos_0[0])
-
-            self.matrix_intensity[0].append_data(intensity_0)
-            self.matrix_pxl_point[0].append_data(pxl_pos_0)
-            self.matrix_point[0].append_data(pos_0)
-
-            if not self.matrix_intensity[0].complete:
-                last_index = self.matrix_point[0].index - 2
-                if last_index < NUM_POINTS-1:
-                    for x, y in zip(range(last_index, -1, -1), range(last_index+1)):
-                        self.get_next_data(x, y, ds)
-                else:
-                    ly_1 = self.matrix_intensity[NUM_POINTS-2].index - 1
-                    for x, y in zip(range(NUM_POINTS-2, -1, -1), range(ly_1, last_index+1)):
-                        self.get_next_data(x, y, ds)
-            else:
-                lx = len(self.matrix_intensity) - 2
-                ly_1 = len(self.matrix_intensity[0].data) - 2
-                ly_2 = len(self.matrix_intensity[-2].data) - 2
-                for x, y in zip(range(lx + 1), range(ly_1, ly_2 - 1, -1)):
-                    self.get_next_data(x, y, ds)
-
-    def get_next_data(self, x, y, ds):
-        intensity_0 = self.matrix_intensity[x].data[y]
-        pos_0 = np.float32(self.matrix_point[x].data[y])
-        pxl_pos_0 = np.float32(self.matrix_pxl_point[x].data[y])
-        if not np.isnan(intensity_0):
-            pos_1, pxl_pos_1, intensity_1 = self.get_next_value(ds, intensity_0, pxl_pos_0, pos_0)
-            if pos_1 is not None and pxl_pos_1 is not None and intensity_1 is not None:
-                pxl = np.float32([[pxl_pos_1[0][0], pxl_pos_1[0][1]]])
-                self.matrix_intensity[x+1].append_data(intensity_1)
-                self.matrix_pxl_point[x+1].append_data(pxl)
-                self.matrix_point[x+1].append_data(pos_1)
-        else:
-                self.matrix_intensity[x+1].append_data(np.nan)
-                self.matrix_pxl_point[x+1].append_data(np.nan)
-                self.matrix_point[x+1].append_data(np.nan)
-
-    def get_gradient(self, rate):
-        intensity_0 = self.matrix_intensity[0].data[0]
-        intensity_1 = self.matrix_intensity[rate].data[0]
-        if intensity_0 == -1 or intensity_1 == -1:
-            gradient = np.nan
-        else:
-            gradient = intensity_1 - intensity_0
-
-    def get_next_value(self, ds, intensity_0, pxl_pos_0, pos=np.float32([[0, 0]])):
-        pos_0 = np.float32([[pos[0][0], pos[0][1], 0]])
-        pos_1 = pos_0 + ds
-        if pos_1 is not None:
-            pxl_pos_1 = self.p_NIT.transform(pos_1)
-            intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
-            return pos_1, pxl_pos_1, intensity_1
-        else:
-            return None, None, None
-
-    def get_ds(self, time, vel):
-        ds = 0
-        if self.stime is not None:
-            dt = time - self.stime
-            ds = vel * dt
-        self.stime = time
-        return ds
-
-    def get_dt(self, time):
-        dt = 0
-        if self.ttime is not None:
-            dt = time - self.ttime
-        self.ttime = time
-        return dt
-
-    def get_pixel(self, point):
-        return np.round(self.hom.project([point])[0], 0).astype(np.int)
-
-    def get_point(self, pixel):
-        return self.hom.transform([pixel])[0]
-
-    def get_value(self, image, pixel):
-        x, y = pixel
-        return image[y, x]
 
 
 if __name__ == '__main__':
+
+    from tachyon.tachyon import LUT_IRON
     from data.analysis import *
+    import argparse
 
-    filename = '/home/jorge/Downloads/20_2000.h5'
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-f', '--file', type=str, default=None, help='hdf5 filename')
+    args = parser.parse_args()
+
+    filename = args.file
+
     data = read_hdf5(filename)
-    velocity = calculate_velocity(data['robot'].time, data['robot'].position)
-    data['robot'] = append_data(data['robot'], velocity)
-
-    robot = data['robot']
-    tachyon = data['tachyon']
-
-    idx = np.arange(0, len(tachyon), FRAME_SAMPLE)
-    times = np.array(tachyon.time[idx])
-    frames = read_frames(tachyon.frame[idx])
-    frames = np.array([cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in frames])
-
-    image = frames[350]
-    r, c = np.unravel_index(np.argmax(image), image.shape)
-    pixel = (c, r)
-
-    maxs = np.array([np.max(frame) for frame in frames])
-    track = np.array([max > LASER_THRESHOLD for max in maxs])
-    times = times[track]
-    frames = frames[track]
+    if 'robot' in data.keys():
+        velocity_data = calculate_velocity(data['robot'].time, data['robot'].position)
+        data['robot'] = append_data(data['robot'], velocity_data)
+        robot = data['robot']
+    if 'tachyon' in data.keys():
+        tachyon = data['tachyon']
+        tachyon = tachyon[tachyon.frame.notnull()]
+        idx = np.arange(0, len(tachyon), FRAME_SAMPLE)
+        times = np.array(tachyon.time[idx])
+        frames = read_frames(tachyon.frame[idx])
 
     coolrate = CoolRate()
-    dt = [coolrate.get_dt(time) for time in times]
-    print 'Delta time', dt
-    #ds = [coolrate.get_ds(robot.time[k], np.array(robot.velocity[k][:2])) for k in range(len(robot))]
-    vel = np.array([0, 0.008]) * 1000
-    ds = [coolrate.get_ds(time, vel) for time in times]
-    print 'Displacement:', ds
+    robot_index = coolrate.find_robot(robot, times)
 
-    #point = (0, 0)
-    point = coolrate.get_point(pixel)
-    pixel = coolrate.get_pixel(point)
-    value = coolrate.get_value(image, pixel)
-    print 'Maximum point, pixel, and value:', point, pixel, value
+    axisNum = 0
 
-    point = coolrate.get_point((12, 14))
+    # #inicializalizo la figura donde se van a visualizar las graficas
+    ax1_0 = coolrate.define_graphs()
 
-    curves = []
-    for j in range(10, len(frames)/10*10-10, 10):
-        cooling = []
-        for k in range(10):
-            if k == 0:
-                pnt = point
-            else:
-                pnt = pnt - ds[j+k]
-            cooling.append(coolrate.get_value(frames[j+k], coolrate.get_pixel(pnt)))
-        curves.append(cooling)
+    plt.ion()
+    for (frame, time, index_robot) in zip(frames, times, robot_index):
 
-    plt.figure()
-    for curve in curves:
-        plt.plot(curve)
-    plt.show()
+        print index_robot
+        y = x = np.arange(0, SIZE_SENSOR, 1)
+        Y, X = np.meshgrid(y, x)
+        index_pixel = coolrate.get_maxvalue(frame)
+
+        if index_pixel is not None:
+            #calcula gradiente
+            coolrate.image_gradient(robot, index_robot, frame, index_pixel,
+                                    time, True)
+        else:
+            if coolrate.matrix_intensity[0].stored_data:
+                coolrate.image_gradient(robot, index_robot, frame, index_pixel,
+                                        time, False)
+
+        if coolrate.matrix_intensity[0].index == coolrate.matrix_intensity[0].length:
+            intensity = [coolrate.matrix_intensity[point].data[0] for point in range(NUM_POINTS)]
+            axisNum = coolrate.visualize(axisNum, ax1_0, intensity, frame)
+
+    x_t = [coolrate.t_axis[t] - coolrate.t_axis[0] for t in range(len(coolrate.t_axis))]
+    coolrate.plot_fitted_data(x_t)
+
+    coolrate.print_stats()
+
+    while True:
+        plt.pause(PAUSE_PLOT)
