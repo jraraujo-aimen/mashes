@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 import cv2
 import numpy as np
@@ -8,25 +9,25 @@ from scipy import stats
 
 
 WHITE = (255, 255, 255)
-FONT_SIZE = 20
+FONT_SIZE = 16
 LINE_WIDTH = 3
 SCALE_VIS = 13
 PAUSE_PLOT = 0.05
 PAUSE_IMAGE = 100
 SIZE_SENSOR = 32
-NUM_PLOTTED = 17
-NUM_POINTS = 10
+NUM_PLOTTED = 9
+NUM_POINTS = 12
 INIT_POINTS = 2
-NUM_POINTS_FITTED = 7
+NUM_POINTS_FITTED = 9
 
 COLORS = ('b', 'g',  'y', 'r', 'm', 'c', 'k')
 
 THR_NO_LASER = 40
-LASER_THRESHOLD = 400
+LASER_THRESHOLD = 250
 W_PPAL = 0.9
-W_SIDE = 0.015
-W_DIAG = 0.01
-FRAME_SAMPLE = 46
+W_SIDE = 0       # 0.015
+W_DIAG = 0       # 0.01
+FRAME_SAMPLE = 47
 
 
 class RingBuffer():
@@ -54,7 +55,7 @@ class RingBuffer():
             self.data[-1] = x
 
     def no_value(self):
-        self.append_data(np.nan)
+        self.data = [np.nan] * self.length
 
 
 #-----------------------------additional classes------------------------------#
@@ -92,13 +93,15 @@ class CoolRate():
         self.matrix_point = [RingBuffer(a) for a in self.sizes]
         self.matrix_pxl_point = [RingBuffer(a) for a in self.sizes]
         self.total_t = RingBuffer(NUM_POINTS)
+        self.images = RingBuffer(NUM_POINTS)
         self.dt_axis = []
         self.t_axis = []
         self.total_intensity = []
 
         self.coeff_1 = []
         self.coeff_2 = []
-        self.coeff_3 = []
+        # self.coeff_3 = []
+        # self.coeff_4 = []
 
     def fit_exp_linear(self, t, y, C=0):
         y = y - C
@@ -107,8 +110,15 @@ class CoolRate():
         A = np.exp(A_log)
         return A, K
 
-    def model_func(self, t, A, K, C):
+    def exp_func(self, t, A, K, C):
         return A * np.exp(K * t) + C
+
+    def fit_linear(self, t, y):
+        A, B = np.polyfit(t, y, 1)
+        return B, A
+
+    def linear_func(self, t, B, A):
+        return B + A * t
 
     def get_maxvalue(self, frame, rng=3):
         image = np.zeros((SIZE_SENSOR, SIZE_SENSOR), dtype=np.uint16)
@@ -184,9 +194,9 @@ class CoolRate():
 
             if data:
                 pxl_pos_0 = np.float32([[pxl_pos[0], pxl_pos[1]]])
-                print "pxl_pos_0", pxl_pos_0
+                # print "pxl_pos_0", pxl_pos_0
                 pos_0 = self.hom.transform(pxl_pos_0)
-                print "pos_0", pos_0
+                # print "pos_0", pos_0
                 intensity_0 = self.get_value_pixel(self.frame_0, pxl_pos_0[0])
             else:
                 pxl_pos_0 = np.nan
@@ -272,56 +282,77 @@ class CoolRate():
         return robot_index
 
     def plot_fitted_data(self, x_t):
-        # print self.coeff_1, self.coeff_2, x_t
+
         fig_1 = plt.figure()
-        fig_1.suptitle('Fitted Function:\n y = A e^(K t) + 0')
-        ax1 = fig_1.add_subplot(211)
-        ax1.plot(x_t, self.coeff_1, linewidth=LINE_WIDTH)
-        ax1.set_title('A', fontsize=FONT_SIZE)
-        ax1.set_xlabel('ms', fontsize=FONT_SIZE)
-        ax1.set_ylabel('value', fontsize=FONT_SIZE)
-        ax1.tick_params(labelsize=FONT_SIZE)
-        ax1.set_ylim([0, 2200])
-        ax2 = fig_1.add_subplot(212)
-        ax2.plot(x_t, self.coeff_2, linewidth=LINE_WIDTH)
-        ax2.set_title('K', fontsize=FONT_SIZE)
-        ax2.set_xlabel('ms', fontsize=FONT_SIZE)
-        ax2.set_ylabel('value', fontsize=FONT_SIZE)
-        ax2.tick_params(labelsize=FONT_SIZE)
-        ax2.set_ylim([-1.2, 0])
-        plt.show()
+        fig_1.suptitle(u'Fitted Function:\n y = A·t + B')
+        ax1_1 = fig_1.add_subplot(211)
+        ax1_1.grid(True)
+        ax1_1.plot(x_t, self.coeff_1, linewidth=LINE_WIDTH)
+        ax1_1.set_title('A', fontsize=FONT_SIZE)
+        ax1_1.set_xlabel('s', fontsize=FONT_SIZE)
+        ax1_1.set_ylabel('value', fontsize=FONT_SIZE)
+        ax1_1.tick_params(labelsize=FONT_SIZE)
+        ax1_1.set_ylim([-200, 0])
+        ax1_1.yaxis.set_ticks([i for i in range(-200, 0, 25)])
+
+        ax2_1 = fig_1.add_subplot(212)
+        ax2_1.grid(True)
+        ax2_1.plot(x_t, self.coeff_2, linewidth=LINE_WIDTH)
+        ax2_1.set_title('B', fontsize=FONT_SIZE)
+        ax2_1.set_xlabel('s', fontsize=FONT_SIZE)
+        ax2_1.set_ylabel('value', fontsize=FONT_SIZE)
+        ax2_1.tick_params(labelsize=FONT_SIZE)
+        ax2_1.set_ylim([0, 1500])
+        ax2_1.yaxis.set_ticks([i for i in range(0, 1500, 100)])
+
+        plt.pause(PAUSE_PLOT)
+        # fig_1.show()
+        # fig_1.show()
+        # plt.draw()
 
     def print_stats(self):
         mean_coeff_1 = np.nanmean(self.coeff_1)
         mean_coeff_2 = np.nanmean(self.coeff_2)
-        print "Media aritmetica:\n A:", mean_coeff_1, "\n K:", mean_coeff_2
+        print "Media aritmetica:\n A:", mean_coeff_1, "\n B:", mean_coeff_2
+
         median_coeff_1 = np.nanmedian(self.coeff_1)
         median_coeff_2 = np.nanmedian(self.coeff_2)
-        print "Mediana ( valor central datos):\n A:", median_coeff_1, "\n K:", median_coeff_2
+        print "Mediana ( valor central datos):\n A:", median_coeff_1, "\n B:", median_coeff_2
+
         var_coeff_1 = np.nanvar(self.coeff_1)
         var_coeff_2 = np.nanvar(self.coeff_2)
-        print "Varianza (dispersion de los datos):\n A:", var_coeff_1, "\n K:", var_coeff_2
+        print "Varianza (dispersion de los datos):\n A:", var_coeff_1, "\n B:", var_coeff_2
+
         std_coeff_1 = np.nanstd(self.coeff_1)
         std_coeff_2 = np.nanstd(self.coeff_2)
-        print "Desv. tipica (raiz cuadrada desv. tipica):\n A:", std_coeff_1, "\n K:", std_coeff_2
+        print "Desv. tipica (raiz cuadrada desv. tipica):\n A:", std_coeff_1, "\n B:", std_coeff_2
+
         mode_coeff_1 = stats.mode(self.coeff_1)
         mode_coeff_2 = stats.mode(self.coeff_2)
-        print "Moda (Valor con mayor frecuencia abs):\n A:", mode_coeff_1, "\n K:", mode_coeff_2
+        print "Moda (Valor con mayor frecuencia abs):\n A:", mode_coeff_1, "\n B:", mode_coeff_2
 
-    def visualize(self, axisNum,ax1_0, intensity, frame):
+
+    def visualize(self, axisNum, fig_0, ax1_0, intensity, frame):
+
         img = frame.copy()
-        img = LUT_IRON[img]
+        self.images.append_data(img)
         self.total_intensity.append(intensity)
         x = np.arange(NUM_POINTS).tolist()
         x_a = np.array(x)
         intensity_f = np.array(intensity[:NUM_POINTS_FITTED])
         x_f = np.array(np.arange(NUM_POINTS_FITTED).tolist())
 
-        A, K = coolrate.fit_exp_linear(x_f, intensity_f, THR_NO_LASER)
-        fit_y = coolrate.model_func(x_a, A, K, THR_NO_LASER)
+        B, A = coolrate.fit_linear(x_f, intensity_f)
+        fit_y = coolrate.linear_func(x_a, B, A)
         coolrate.coeff_1.append(A)
-        coolrate.coeff_2.append(K)
-        set_time = [x*FRAME_SAMPLE for x in range(NUM_POINTS)]
+        coolrate.coeff_2.append(B)
+        set_time = [t*FRAME_SAMPLE for t in range(NUM_POINTS)]
+
+        # A, K = coolrate.fit_exp_linear(x_f, intensity_f, THR_NO_LASER)
+        # fit_y = coolrate.exp_func(x_a, A, K, THR_NO_LASER)
+        # coolrate.coeff_1.append(A)
+        # coolrate.coeff_2.append(K)
+        # set_time = [x*FRAME_SAMPLE for x in range(NUM_POINTS)]
 
         if self.points_plotted == NUM_PLOTTED:
             axisNum += 1
@@ -330,19 +361,19 @@ class CoolRate():
             ax1_0.plot(set_time, intensity, color=color, linewidth=LINE_WIDTH)
             plt.pause(PAUSE_PLOT)
 
-            plt.ion()
             ax1_0.plot(set_time, fit_y, '--', color=color, linewidth=LINE_WIDTH)
             plt.pause(PAUSE_PLOT)
             self.points_plotted = 0
         else:
             self.points_plotted = self.points_plotted + 1
 
+        img = self.images.data[0]
+        img = LUT_IRON[img]
         w, h, c = img.shape
         img_plus = cv2.resize(img, (w*SCALE_VIS, h*SCALE_VIS), interpolation=cv2.INTER_LINEAR)
         pxl = [coolrate.matrix_pxl_point[t].data[0] for t in range(NUM_POINTS)]
         for p in pxl:
             if not np.isnan(p).any():
-                print p
                 cv2.circle(img_plus, (int(round(p[0][1])*SCALE_VIS), int(round(p[0][0])*SCALE_VIS)), 4, WHITE, -1)
         cv2.imshow("Image: ", img_plus)
         cv2.waitKey(PAUSE_IMAGE)
@@ -360,8 +391,9 @@ class CoolRate():
         ax1_0.set_xlim([0, FRAME_SAMPLE*(NUM_POINTS-1)])
         ax1_0.set_ylim([0, 1024])
         ax1_0.tick_params(labelsize=FONT_SIZE)
-        return ax1_0
 
+
+        return fig_0, ax1_0
 
 
 if __name__ == '__main__':
@@ -387,6 +419,11 @@ if __name__ == '__main__':
         tachyon = tachyon[tachyon.frame.notnull()]
         idx = np.arange(0, len(tachyon), FRAME_SAMPLE)
         times = np.array(tachyon.time[idx])
+
+        for i in idx:
+            frames = read_frames(tachyon.frame[i])
+            print i
+
         frames = read_frames(tachyon.frame[idx])
 
     coolrate = CoolRate()
@@ -395,9 +432,9 @@ if __name__ == '__main__':
     axisNum = 0
 
     # #inicializalizo la figura donde se van a visualizar las graficas
-    ax1_0 = coolrate.define_graphs()
+    fig_0, ax1_0 = coolrate.define_graphs()
 
-    plt.ion()
+    # plt.ion()
     for (frame, time, index_robot) in zip(frames, times, robot_index):
 
         print index_robot
@@ -416,12 +453,14 @@ if __name__ == '__main__':
 
         if coolrate.matrix_intensity[0].index == coolrate.matrix_intensity[0].length:
             intensity = [coolrate.matrix_intensity[point].data[0] for point in range(NUM_POINTS)]
-            axisNum = coolrate.visualize(axisNum, ax1_0, intensity, frame)
+            axisNum = coolrate.visualize(axisNum, fig_0, ax1_0, intensity, frame)
 
     x_t = [coolrate.t_axis[t] - coolrate.t_axis[0] for t in range(len(coolrate.t_axis))]
     coolrate.plot_fitted_data(x_t)
 
     coolrate.print_stats()
-
-    while True:
-        plt.pause(PAUSE_PLOT)
+    plt.show(block=False)
+    # cv2.waitKey(0)
+    raw_input("-->")
+    # while True:
+    #     plt.pause(PAUSE_PLOT)
