@@ -27,7 +27,8 @@ LASER_THRESHOLD = 250
 W_PPAL = 0.9
 W_SIDE = 0       # 0.015
 W_DIAG = 0       # 0.01
-FRAME_SAMPLE = 47
+#FRAME_SAMPLE = 47
+FRAME_SAMPLE = 16
 
 
 class RingBuffer():
@@ -69,7 +70,7 @@ class CoolRate():
         self.laser_on = False
 
         self.hom = Homography()
-        self.hom.load('../../../mashes_calibration/config/tachyon_NO.yaml')
+        self.hom.load('../../config/tachyon_coolrate.yaml')
 
         self.max_value = []
         self.max_i = []
@@ -122,7 +123,7 @@ class CoolRate():
 
     def get_maxvalue(self, frame, rng=3):
         image = np.zeros((SIZE_SENSOR, SIZE_SENSOR), dtype=np.uint16)
-        pxls = [np.float32([v, u]) for v in range(0, SIZE_SENSOR) for u in range(0, SIZE_SENSOR)]
+        pxls = [np.float32([x, y]) for x in range(0, SIZE_SENSOR) for y in range(0, SIZE_SENSOR)]
         for pxl in pxls:
             index = pxl[0], pxl[1]
             intensity = self.get_value_pixel(frame, pxl)
@@ -133,9 +134,9 @@ class CoolRate():
 
         value = np.amax(image)
         i = np.unravel_index(np.argmax(image), image.shape)
-        print value, i
         if value > LASER_THRESHOLD:
             print "laser on"
+            print " "
             return i
         else:
             return None
@@ -143,30 +144,30 @@ class CoolRate():
     def get_value_pixel(self, frame, pxl, rng=3):
         intensity = -1
         limits = (rng - 1)/2
-        p_0 = round(pxl[0])
-        p_1 = round(pxl[1])
-        if (((p_0-limits) < 0) or ((p_0+limits) > (SIZE_SENSOR-1))
-                or ((p_1-limits) < 0) or ((p_1+limits) > (SIZE_SENSOR-1))):
+        p_x = round(pxl[0])
+        p_y = round(pxl[1])
+        if (((p_x-limits) < 0) or ((p_x+limits) > (SIZE_SENSOR-1))
+                or ((p_y-limits) < 0) or ((p_y+limits) > (SIZE_SENSOR-1))):
             return intensity
         else:
             intensity = 0
             if rng == 3:
-                for v in range(-limits, limits+1):
-                    for u in range(-limits, limits+1):
-                        index_v = pxl[0] + v
-                        index_u = pxl[1] + u
-                        if u == 0 and v == 0:
-                            intensity = intensity + frame[index_v, index_u]*W_PPAL
-                        elif u == 0 or v == 0:
-                            intensity = intensity + frame[index_v, index_u]*W_SIDE
+                for row in range(-limits, limits+1):
+                    for column in range(-limits, limits+1):
+                        index_r = pxl[1] + row
+                        index_c = pxl[0] + column
+                        if column == 0 and row == 0:
+                            intensity = intensity + frame[index_r, index_c]*W_PPAL
+                        elif column == 0 or row == 0:
+                            intensity = intensity + frame[index_r, index_c]*W_SIDE
                         else:
-                            intensity = intensity + frame[index_v, index_u]*W_DIAG
+                            intensity = intensity + frame[index_r, index_c]*W_DIAG
             else:
-                for v in range(-limits, limits+1):
-                    for u in range(-limits, limits+1):
-                        index_v = p_0 + v
-                        index_u = p_1 + u
-                        intensity = intensity + frame[index_v, index_u]
+                for row in range(-limits, limits+1):
+                    for column in range(-limits, limits+1):
+                        index_r = p_y + row
+                        index_c = p_x + coolumn
+                        intensity = intensity + frame[index_r, index_c]
                 intensity = intensity/(rng*rng)
             return intensity
 
@@ -213,8 +214,8 @@ class CoolRate():
                     for x, y in zip(range(last_index, -1, -1), range(last_index+1)):
                         self.get_next_data(x, y)
                 else:
-                    ly_1 = self.matrix_intensity[NUM_POINTS-2].index - 1
-                    for x, y in zip(range(NUM_POINTS-2, -1, -1), range(ly_1, last_index+1)):
+                    lx_1 = self.matrix_intensity[NUM_POINTS-2].index - 1
+                    for x, y in zip(range(NUM_POINTS-2, -1, -1), range(lx_1, last_index+1)):
                         self.get_next_data(x, y)
             else:
                 lx = len(self.matrix_intensity) - 2
@@ -244,7 +245,7 @@ class CoolRate():
             dt = time - self.time
             self.dt = dt
             self.total_t.append_data(self.time)
-            self.ds = vel * dt * 1000
+            self.ds = (-1) * vel * dt * 1000
             #m/s
             #/ 1000000000
         self.time = time
@@ -252,11 +253,11 @@ class CoolRate():
     def get_next_value(self, intensity_0, pxl_pos_0, pos=np.float32([[0, 0]])):
         pos_0 = np.float32([[pos[0][0], pos[0][1], 0]])
         pos_1 = self.get_position(pos_0)
+
         if pos_1 is not None and self.dt < 0.2 * 1000000000:
         #         #frame_0: position_0
             pxl_pos_1 = self.hom.project(pos_1)
             intensity_1 = self.get_value_pixel(self.frame_1, pxl_pos_1[0])
-
             # if intensity_0 == -1 or intensity_1 == -1:
             #     gradient = np.nan
             # else:
@@ -268,7 +269,7 @@ class CoolRate():
 
     def get_position(self, position):
         if self.dt is not None:
-            position_1 = position + self.ds
+            position_1 = position + [self.ds[0], self.ds[1], self.ds[2]]
             return position_1
         else:
             return None
@@ -374,7 +375,7 @@ class CoolRate():
         pxl = [coolrate.matrix_pxl_point[t].data[0] for t in range(NUM_POINTS)]
         for p in pxl:
             if not np.isnan(p).any():
-                cv2.circle(img_plus, (int(round(p[0][1])*SCALE_VIS), int(round(p[0][0])*SCALE_VIS)), 4, WHITE, -1)
+                cv2.circle(img_plus, (int(round(p[0][0])*SCALE_VIS), int(round(p[0][1])*SCALE_VIS)), 4, WHITE, -1)
         cv2.imshow("Image: ", img_plus)
         cv2.waitKey(PAUSE_IMAGE)
         coolrate.t_axis.append(float(coolrate.total_t.data[0])/1000000)
