@@ -63,7 +63,8 @@ if __name__ == '__main__':
 
     plt.figure()
     plt.subplot(121)
-    im_NIT = cv2.imread('../../data/nit_focus.jpg')
+    im_NIT = cv2.imread('../../data/nir_focus.jpg')
+    print im_NIT.shape
     plt.imshow(cv2.cvtColor(im_NIT, cv2.COLOR_BGR2RGB), interpolation='none')
     plt.axis('off')
     plt.subplot(122)
