@@ -19,7 +19,7 @@ class ImageViewer():
     def __init__(self):
         rospy.init_node('viewer', anonymous=True)
 
-        image_topic = rospy.get_param('~image', '/camera/image')
+        image_topic = rospy.get_param('~image', '/image/image')
         self.camera = image_topic.split('/')[1]
 
         rospy.Subscriber(image_topic, Image, self.callback, queue_size=1)
