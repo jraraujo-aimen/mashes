@@ -1,7 +1,7 @@
 <launch>
   <arg name="gui" default="true" />
 
-  <!--<node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" />-->
+  <node pkg="nodelet" type="nodelet" name="nodelet_manager" args="manager" output="screen" if="$(arg gui)"/>
 
   <node pkg="nodelet" type="nodelet" name="camera_nodelet"
         args="load ueye_cam/ueye_cam_nodelet nodelet_manager">
@@ -17,8 +17,8 @@
 
     <param name="image_width" type="int" value="640" />
     <param name="image_height" type="int" value="512" />
-    <param name="image_left" type="int" value="330" />
-    <param name="image_top" type="int" value="350" />
+    <param name="image_left" type="int" value="370" />
+    <param name="image_top" type="int" value="285" />
 
     <param name="subsampling" type="int" value="1" />
     <param name="binning" type="int" value="4" />

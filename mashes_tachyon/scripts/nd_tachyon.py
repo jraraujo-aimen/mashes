@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import cv2
 import rospy
 import rospkg
 import numpy as np
@@ -52,6 +53,8 @@ class NdTachyon():
                     frame = LUT_IRON[frame]
                 elif mode == 'mono16':
                     frame = np.uint16(frame)
+                    frame = cv2.resize(frame[11:27,6:22], (32, 32))
+                    # frame = cv2.resize(frame, (32, 32))
                 else:
                     frame = np.uint8(frame >> 2)
                 image_msg = bridge.cv2_to_imgmsg(frame, encoding=mode)

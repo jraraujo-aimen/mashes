@@ -19,7 +19,8 @@ class ImageViewer():
     def __init__(self):
         rospy.init_node('viewer', anonymous=True)
 
-        image_topic = rospy.get_param('~image', '/camera/image')
+        image_topic = rospy.get_param('~image', '/image/image')
+        self.camera = image_topic.split('/')[1]
 
         rospy.Subscriber(image_topic, Image, self.callback, queue_size=1)
         rospy.on_shutdown(self.on_shutdown_hook)
@@ -61,7 +62,10 @@ class ImageViewer():
             self.stamp = data.header.stamp
             frame = self.bridge.imgmsg_to_cv2(data)
             if data.encoding == 'mono16':
-                self.frame = cv2.cvtColor(LUT_IRON[frame], cv2.COLOR_RGB2BGR)
+                if self.camera == 'tachyon':
+                    self.frame = cv2.cvtColor(LUT_IRON[frame], cv2.COLOR_RGB2BGR)
+                else:
+                    self.frame = frame
             elif data.encoding == 'mono8':
                 self.frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
             else:
