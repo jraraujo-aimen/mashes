@@ -23,8 +23,8 @@ NUM_POINTS_FITTED = 9
 COLORS = ('b', 'g',  'y', 'r', 'm', 'c', 'k')
 
 THR_NO_LASER = 40
-LASER_THRESHOLD = 250
-W_PPAL = 0.9
+LASER_THRESHOLD = 200
+W_PPAL = 1.0
 W_SIDE = 0       # 0.015
 W_DIAG = 0       # 0.01
 #FRAME_SAMPLE = 47
@@ -88,8 +88,7 @@ class CoolRate():
         self.frame_1 = np.zeros((SIZE_SENSOR, SIZE_SENSOR, 1), dtype=np.uint8)
         self.image = np.zeros((SIZE_SENSOR, SIZE_SENSOR, 1), dtype=np.uint8)
 
-        self.sizes = list(range(
-            INIT_POINTS + NUM_POINTS, INIT_POINTS, -1))
+        self.sizes = list(range(INIT_POINTS + NUM_POINTS, INIT_POINTS, -1))
         self.matrix_intensity = [RingBuffer(a) for a in self.sizes]
         self.matrix_point = [RingBuffer(a) for a in self.sizes]
         self.matrix_pxl_point = [RingBuffer(a) for a in self.sizes]
