@@ -18,18 +18,12 @@ class NdVelocity():
         self.msg_velocity = MsgVelocity()
         self.listener = tf.TransformListener()
 
-        r = rospy.Rate(10)  # 10hz
+        r = rospy.Rate(25)
         while not rospy.is_shutdown():
-            try:
-                self.pub_velocity()
-            except:
-                rospy.logerr("pub_velocity")
+            self.pub_velocity()
             r.sleep()
 
     def pub_velocity(self):
-        # Make sure we see the world and tcp frames
-        self.listener.waitForTransform(
-            "/world", "/tcp0", rospy.Time(), rospy.Duration(5.0))
         try:
             stamp = rospy.Time.now()
             self.listener.waitForTransform(
@@ -43,11 +37,11 @@ class NdVelocity():
             self.msg_velocity.vx = velocity[0]
             self.msg_velocity.vy = velocity[1]
             self.msg_velocity.vz = velocity[2]
-            rospy.loginfo(self.msg_velocity)
             self.velocity_pub.publish(self.msg_velocity)
         except (tf.Exception, tf.LookupException, tf.ConnectivityException,
                 tf.ExtrapolationException):
             rospy.loginfo("TF Exception")
+
 
 if __name__ == '__main__':
     try:

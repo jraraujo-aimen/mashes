@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>mashes_tachyon</name>
-  <version>0.3.0</version>
+  <version>0.5.0</version>
   <description>The mashes_tachyon package.</description>
   <maintainer email="jorge.rodriguez@aimen.es">Jorge Rodríguez-Araújo</maintainer>
   <license>BSD</license>

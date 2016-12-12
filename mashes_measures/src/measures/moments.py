@@ -20,7 +20,6 @@ class Moments():
             else:
                 lut[k] = 255
         lut_levels = np.uint8(lut)
-        print lut_levels
         img = lut_levels[img]
         # self.lut_conv = (np.asarray(range(value))*(256))/value
         # img=self.lut_conv[img]
@@ -51,19 +50,19 @@ class Moments():
         return box
 
     def moments(self, image):
+        image = image.astype(np.float32)
         width, height = image.shape[1], image.shape[0]
-        m00, m01, m10, m11, m02, m20 = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
-        for y in range(height):
-            for x in range(width):
-                m00 = m00 + image[y, x]
-                m10 = m10 + x * image[y, x]
-                m01 = m01 + y * image[y, x]
-                m11 = m11 + x * y * image[y, x]
-                m20 = m20 + x * x * image[y, x]
-                m02 = m02 + y * y * image[y, x]
+        xx = np.arange(width).reshape((1, width))
+        yy = np.arange(height).reshape((height, 1))
+        m00 = np.sum(image)
+        m10 = np.sum(xx * image)
+        m01 = np.sum(yy * image)
+        m11 = np.sum(xx * yy * image)
+        m20 = np.sum(xx * xx * image)
+        m02 = np.sum(yy * yy * image)
         return [m00, m01, m10, m11, m02, m20]
 
-    def ellipse(self, image):
+    def find_ellipse(self, image):
         """Calculates the ellipse approximation of the shape in the image."""
         m00, m01, m10, m11, m02, m20 = self.moments(image)
         x_cm, y_cm, angle, length, width = 0, 0, 0, 0, 0
@@ -82,13 +81,12 @@ class Moments():
             angle = np.arctan((2 * u11) / (u20 - u02 + 0.0000001)) / 2
             length = 4 * np.sqrt(lmax)
             width = 4 * np.sqrt(lmin)
-        return [x_cm, y_cm, angle, length, width]
+        return (x_cm, y_cm), (length, width), angle
 
     def find_geometry(self, frame):
         img_bin = self.binarize(frame)
-        x_cm, y_cm, angle, length, width = self.ellipse(img_bin)
-        major_axis, minor_axis, angle_rads = length, width, angle
-        return major_axis, minor_axis, angle_rads
+        center, axis, angle = self.find_ellipse(img_bin)
+        return center, axis, angle
 
 
 if __name__ == '__main__':
@@ -96,19 +94,17 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from matplotlib.patches import Ellipse
 
-    img = cv2.imread('../../data/frame0015.jpg')
+    img = cv2.imread('../../data/frame0000.jpg')
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    #img = (img.astype("uint16"))*(1024/255)
-    #print np.max(img)
 
     moments = Moments(127)
     img_bin = moments.binarize(img)
-    x_cm, y_cm, angle, length, width = moments.ellipse(img_bin)
-    print width, length, angle
+    center, axis, angle = moments.find_ellipse(img_bin)
+    print center, axis, angle
 
     img_pix = moments.levels(img, 63, 191)
-    px_cm, py_cm, pangle, plength, pwidth = moments.ellipse(img_pix)
-    print pwidth, plength, pangle
+    pellipse = moments.find_ellipse(img_pix)
+    print pellipse
 
     left, top, right, bottom = moments.bounding_box(img)
     print right - left, bottom - top
@@ -123,13 +119,13 @@ if __name__ == '__main__':
     plt.subplot(223)
     plt.imshow(img_bin, cmap='gray')
     plt.axis('off')
-    plt.gca().add_patch(Ellipse([x_cm, y_cm], length, width,
+    plt.gca().add_patch(Ellipse(center, axis[0], axis[1],
                                 angle=np.rad2deg(angle),
                                 facecolor='none', edgecolor='red', lw=1.5))
     plt.subplot(224)
     plt.imshow(img_pix, cmap='gray')
     plt.axis('off')
-    plt.gca().add_patch(Ellipse([px_cm, py_cm], plength, pwidth,
-                                angle=np.rad2deg(pangle),
+    plt.gca().add_patch(Ellipse(pellipse[0], pellipse[1][0], pellipse[1][1],
+                                angle=np.rad2deg(pellipse[2]),
                                 facecolor='none', edgecolor='red', lw=1.5))
     plt.show()

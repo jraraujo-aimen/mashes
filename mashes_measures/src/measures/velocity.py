@@ -3,23 +3,20 @@ import numpy as np
 
 class Velocity():
     def __init__(self):
-        self.time = None
-        self.position = None
+        self.len = 10
+        self.times = []
+        self.positions = []
 
     def instantaneous(self, time, position):
-        if self.position is None:
-            speed = 0
+        if len(self.positions) < self.len:
             vel = np.array([0, 0, 0])
+            speed = 0
         else:
-            dt = time - self.time
-            dp = position - self.position
-            speed = np.sqrt(np.sum(dp * dp)) / dt
-            vel = np.around(dp / dt, decimals=4)
-        if speed < 0.0005:
-            speed = 0.0
-        self.time = time
-        self.position = position
-        return np.around(speed, decimals=4), np.around(vel, decimals=4)
+            vel = (position - self.positions.pop()) / (time - self.times.pop())
+            speed = np.sqrt(np.sum(vel * vel))
+        self.times.insert(0, time)
+        self.positions.insert(0, position)
+        return np.around(speed, decimals=4), np.around(vel, decimals=5)
 
 
 if __name__ == '__main__':
