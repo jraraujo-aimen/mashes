@@ -124,12 +124,12 @@ class CoolRate():
         image = np.zeros((SIZE_SENSOR, SIZE_SENSOR), dtype=np.uint16)
         pxls = [np.float32([x, y]) for x in range(0, SIZE_SENSOR) for y in range(0, SIZE_SENSOR)]
         for pxl in pxls:
-            index = pxl[0], pxl[1]
+            idr, idc = int(pxl[0]), int(pxl[1])
             intensity = self.get_value_pixel(frame, pxl)
             if intensity == -1:
-                image[index] = 0
+                image[idr, idc] = 0
             else:
-                image[index] = intensity
+                image[idr, idc] = intensity
 
         value = np.amax(image)
         i = np.unravel_index(np.argmax(image), image.shape)
@@ -153,8 +153,8 @@ class CoolRate():
             if rng == 3:
                 for row in range(-limits, limits+1):
                     for column in range(-limits, limits+1):
-                        index_r = pxl[1] + row
-                        index_c = pxl[0] + column
+                        index_r = int(pxl[1] + row)
+                        index_c = int(pxl[0] + column)
                         if column == 0 and row == 0:
                             intensity = intensity + frame[index_r, index_c]*W_PPAL
                         elif column == 0 or row == 0:
@@ -164,8 +164,8 @@ class CoolRate():
             else:
                 for row in range(-limits, limits+1):
                     for column in range(-limits, limits+1):
-                        index_r = p_y + row
-                        index_c = p_x + coolumn
+                        index_r = int(p_y + row)
+                        index_c = int(p_x + coolumn)
                         intensity = intensity + frame[index_r, index_c]
                 intensity = intensity/(rng*rng)
             return intensity
